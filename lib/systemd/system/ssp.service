@@ -1,0 +1,12 @@
+[Unit]
+Description=Ejemplo servicio
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/ssp_files/service.py
+Restart=on-failure
+User=root
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,9 @@
+#!/bin/bash
+
+echo "Running post-install script..."
+
+# Configuraciones de servicio
+systemctl daemon-reload
+systemctl unmask ssp.service
+systemctl enable ssp.service
+systemctl start ssp.service

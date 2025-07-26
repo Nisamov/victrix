@@ -1,0 +1,6 @@
+#!/bin/bash
+
+echo "Running prerm-install script..."
+
+#systemctl stop ssp.service
+#systemctl disable ssp.service
