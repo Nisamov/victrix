@@ -8,7 +8,7 @@ Puede ser peligroso si se configura de una mala manera.
 
 Para descargar el software, ve a [releases](https://github.com/Nisamov/ssp/releases) y descárgate el paquete en el equipo.
 
-Descomprime el mismo, elimina los directorios [.github y .git] y ficheros [LICENSE, README.md] para posteriormente otorgar los siguientes permisos:
+Descomprime el mismo, elimina los directorios [_repo, .github y .git] y ficheros [LICENSE, README.md] para posteriormente otorgar los siguientes permisos:
 ```
 sudo chmod 0755 ssp/DEBIAN # /DEBIAN >> Permisos >=0755 y <=0775
 sudo chmod 0755 ssp/DEBIAN/* # /DEBIAN/* >> Permisos >=0755 y <=0775

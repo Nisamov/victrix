@@ -1,11 +1,12 @@
 [Unit]
-Description=Ejemplo servicio
+Description=Deteccion y control de servicios no autorizados
 After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/sbin/ssp_files/service.py
-Restart=on-failure
+ExecStart=/usr/bin/python3 /usr/sbin/ssp_files/service.py
+WorkingDirectory=/usr/sbin/ssp_files
+Restart=always
 User=root
 
 [Install]
