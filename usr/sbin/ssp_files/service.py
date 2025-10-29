@@ -7,7 +7,7 @@ import subprocess
 import time
 
 # Fichero de configuracion
-etc_ssp_conf = Path("/etc/ssp.conf")
+etc_ssp_conf = Path("/etc/ssp/ssp.conf")
 if not etc_ssp_conf.exists():
     # Si la ruta no existe, advertencia al usuario
     print("Config file does not exist:", etc_ssp_conf)
