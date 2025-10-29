@@ -4,13 +4,17 @@ Puede ser peligroso si se configura de una mala manera.
 
 ## Instalación
 
-Para descargar el software, ve a [releases](https://github.com/Nisamov/ssp/releases) y descárgate el paquete en el equipo.
+Para descargar el software, ve a [releases](https://github.com/Nisamov/ssp/releases) y descárgate el paquete en el equipo, o ejecuta el siguiente comando desde la terminal:
+```sh
+sudo apt install git -y && git clone https://github.com/Nisamov/ssp
+```
 
-Descomprime el mismo, elimina los directorios [_repo, .github y .git] y ficheros [LICENSE, README.md] para posteriormente otorgar los siguientes permisos:
+Con el repositorio descargado, ejecuta el siguiente comando (ruta relativa):
+```sh
+sudo chmod 0755 ssp/DEBIAN/*
 ```
-sudo chmod 0755 ssp/DEBIAN # /DEBIAN >> Permisos >=0755 y <=0775
-sudo chmod 0755 ssp/DEBIAN/* # /DEBIAN/* >> Permisos >=0755 y <=0775
-```
+Los permisos deberian ser 0755 [0 usuario permisos rxw, 5 de grupos y 5 para otros]
+
 Ahora monta el paquete `.deb`con:
 ```sh
 dpkg-deb --build mi-paquete nombre-del-paquete.deb
