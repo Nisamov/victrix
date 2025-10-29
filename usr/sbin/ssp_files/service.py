@@ -54,7 +54,7 @@ print("check_interval", check_interval, "purge_on_detect" , purge_on_detect)
 
 # Fichero de servicios permitidos
 # Si el directorio existe, se comprueba que en su interior existe el fichero que alberga los servicios pemritidos
-lib_systemd_system_deb_services = Path("/usr/local/sbin/ssp_files/deb_services")
+lib_systemd_system_deb_services = Path("/usr/sbin/ssp_files/deb_services")
 if not lib_systemd_system_deb_services.exists():
     # Si la ruta no existe, advertencia al usuario
     print("[CRITICAL ERROR] File does not exist:", lib_systemd_system_deb_services)
