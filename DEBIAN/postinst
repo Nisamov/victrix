@@ -1,11 +1,9 @@
 #!/bin/bash
 # Limpieza de consola
 clear
-# Diferencial inicio
-echo "#-----------------------------------------------------------#"
 
 # Inicio postinst
-echo "Starting postinst"
+echo "Iniciando postinst"
 
 # Licencia de servicio
 echo "Clonando Licencia..."
@@ -26,7 +24,4 @@ sudo chmod 755 /lib/systemd/system/ssp.service
 sudo chmod 755 /usr/sbin/ssp
 
 # Final Postinst
-echo "Postinst ended"
-
-# Diferencial final
-echo "#-----------------------------------------------------------#"
+echo "Postinst terminado"

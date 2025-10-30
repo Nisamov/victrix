@@ -1,0 +1,26 @@
+#!/bin/bash
+set -e
+
+echo "Revisando Python 3..."
+
+# Verificar si python3 está disponible
+if ! command -v python3 >/dev/null 2>&1; then
+    echo "Python 3 no está instalado."
+    
+    # Preguntar al usuario si quiere instalarlo
+    echo "El servicio SSP require de Python3 para funcionar"
+    read -rp "¿Descargar Python 3? (y/n): " answer
+    if [[ "$answer" =~ ^[Yy]$ ]]; then
+        echo "Instalando Python 3..."
+        # Usar apt para instalar
+        sudo apt update
+        sudo apt install -y python3
+    else
+        echo "Python 3 es necesario para el servicio, cancelando instalación."
+        exit 1
+    fi
+else
+    echo "Python 3 ya está instalado."
+fi
+
+exit 0
