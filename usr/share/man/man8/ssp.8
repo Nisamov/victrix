@@ -3,7 +3,7 @@
 .\" -----------------------------------------------------------------
 .TH SSP 8 "Octubre 2025" "ssp 1.0" "Administración del sistema"
 .SH NOMBRE
-ssp \- Servicio de detección y control de servicios no autorizados
+ssp \- Secure Service Protocol | Protocolo de Servicios Seguros
 .SH SINOPSIS
 .B systemctl
 [\fICOMANDO\fR] ssp.service
@@ -13,8 +13,8 @@ ssp \- Servicio de detección y control de servicios no autorizados
 El servicio
 .B ssp
 (Servicio de Seguridad de Procesos) es un demonio que monitoriza el sistema
-para detectar, registrar y detener servicios no autorizados o procesos
-que violen las políticas de seguridad establecidas en la whitelist (/usr/sbin/ssp_files/deb_services).
+para detectar, registrar y detener servicios no autorizados en la whitelist (/usr/sbin/ssp_files/deb_services).
+El nivel de seguridad, queda declarado en el fichero de configuración (/etc/ssp/ssp.conf).
 
 Este servicio se ejecuta de forma continua bajo
 .BR systemd (1)

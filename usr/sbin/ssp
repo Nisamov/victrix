@@ -3,15 +3,20 @@
 ssp_files="/usr/local/sbin/ssp_files"
 config_file="/etc/ssp.conf"
 
+ROJO='\033[0;31m'
+NC='\033[0m' # Sin color
+AMARILLO='\033[1;33m'
+
 uninstall() {
     read -rp "Are you sure you want to uninstall? (y/n): " confirmation
     if [[ "$confirmation" =~ ^[Yy]$ ]]; then
-        echo "Uninstalling..."
+        echo -e "${ROJO}Started removing SSP form the system...${NC}"
         sudo systemctl stop ssp
         sudo systemctl disable ssp
         sudo dpkg -r ssp
+        echo "Jumping to prerm..."
     else
-        echo "Uninstallation cancelled."
+        echo -e "${ROJO}Uninstallation cancelled.${NC}"
         exit 1 # Salida por cancelacion
     fi
 }
@@ -23,7 +28,7 @@ case "$1" in
         echo "  -c, --config     Edit configuration file"
         echo "  -l  --logs       Open logs folder"
         echo "  -u, --uninstall  Desinstala el servicio y archivos relacionados"
-        echo " man, man ssp      Abre el manual del servicio"
+        echo " man,              Abre el manual del servicio"
         ;;
     -v|--version)
         echo "V0.0.0"
@@ -43,7 +48,8 @@ case "$1" in
         uninstall
         ;;
     *)
-        echo "Error: $1"
+        echo -e "Error: ${ROJO}'$1'${NC} - Invalid character"
+        echo -e "Try ${AMARILLO}'ssp --help'${NC} or ${AMARILLO}'man ssp'${NC}."
         exit 1 # Salida por cancelacion
         ;;
 esac
