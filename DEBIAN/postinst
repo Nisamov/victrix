@@ -1,9 +1,19 @@
 #!/bin/bash
 
-echo "Running post-install script..."
+# Licencia de servicio
+echo "Clonando Licencia..."
+sudo cp /$USER/home/ssp/LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
+
+echo "Iniciando y habilitando servicio..."
 
 # Configuraciones de servicio
 systemctl daemon-reload
 systemctl unmask ssp.service
 systemctl enable ssp.service
 systemctl start ssp.service
+
+echo "Aplicando permisos..."
+
+#Configuraciones de permisos
+sudo chmod 755 /lib/systemd/system/ssp.service
+sudo chmod 755 /usr/sbin/ssp

@@ -1,0 +1,81 @@
+.\" -----------------------------------------------------------------
+.\" Página de manual para el servicio SSP
+.\" -----------------------------------------------------------------
+.TH SSP 8 "Octubre 2025" "ssp 1.0" "Administración del sistema"
+.SH NOMBRE
+ssp \- Servicio de detección y control de servicios no autorizados
+.SH SINOPSIS
+.B systemctl
+[\fICOMANDO\fR] ssp.service
+.br
+.B /usr/bin/python3 /usr/sbin/ssp_files/service.py
+.SH DESCRIPCIÓN
+El servicio
+.B ssp
+(Servicio de Seguridad de Procesos) es un demonio que monitoriza el sistema
+para detectar, registrar y detener servicios no autorizados o procesos
+que violen las políticas de seguridad establecidas en la whitelist (/usr/sbin/ssp_files/deb_services).
+
+Este servicio se ejecuta de forma continua bajo
+.BR systemd (1)
+y puede reiniciarse automáticamente en caso de fallo.
+
+El script principal del servicio se encuentra en:
+.BR /usr/sbin/ssp_files/service.py .
+
+.SH OPCIONES
+El servicio se gestiona mediante
+.BR systemctl (1) .
+Algunos comandos útiles son:
+.TP
+.B systemctl start ssp.service
+Inicia el servicio.
+.TP
+.B systemctl stop ssp.service
+Detiene el servicio.
+.TP
+.B systemctl restart ssp.service
+Reinicia el servicio.
+.TP
+.B systemctl status ssp.service
+Muestra el estado y los logs del servicio.
+.TP
+.B ssp -h | ssp --help
+Muestra la ayuda rapida del servicio.
+.TP
+.B man ssp
+Muestra el manual del servicio.
+
+.SH ARCHIVOS
+.TP
+.B /usr/lib/systemd/system/ssp.service
+Archivo de unidad de systemd.
+.TP
+.B /usr/sbin/ssp_files/service.py
+Script principal del servicio.
+.TP
+.B /var/log/ssp.log
+Archivo de registro (si aplica).
+
+.SH DIAGNÓSTICO
+Los registros del servicio pueden consultarse con:
+.RS
+.B journalctl -u ssp.service
+.RE
+
+.SH SEGURIDAD
+El servicio se ejecuta como usuario root, por lo que se recomienda
+revisar cuidadosamente su código y permisos.  
+Puede limitarse el acceso mediante parámetros de systemd como
+.B CapabilityBoundingSet
+y
+.B NoNewPrivileges .
+
+.SH AUTOR
+Creado por Andrés Ruslan Abadías Otal.
+Adaptado para Debian bajo la licencia Apache 2.0.
+
+.SH VER TAMBIÉN
+.BR systemd (1),
+.BR systemctl (1),
+.BR journalctl (1)

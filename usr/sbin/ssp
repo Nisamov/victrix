@@ -1,11 +1,7 @@
 #!/bin/bash
 
 ssp_files="/usr/local/sbin/ssp_files"
-ssp_service="/etc/systemd/system/ssp.service"
-ssp_file="/usr/local/sbin/ssp"
-etc_ssp="/etc/ssp"
 config_file="/etc/ssp.conf"
-main_service=/usr/sbin/ssp_files""
 
 uninstall() {
     read -rp "Are you sure you want to uninstall? (y/n): " confirmation
@@ -13,24 +9,10 @@ uninstall() {
         echo "Uninstalling..."
         sudo systemctl stop ssp
         sudo systemctl disable ssp
-        sudo rm -f "$ssp_service"
-        sudo rm -rf "$ssp_files" "$ssp_file" "$etc_ssp"
-        # Verification
-        if [[ ! -e "$ssp_service" && ! -d "$ssp_files" && ! -f "$ssp_file" && ! -d "$etc_ssp" ]]; then
-            echo "Uninstallation successfull."
-        else
-            echo "Error: Some of the files/dirs couldn't be removed."
-            ls -ld "$ssp_service" "$ssp_files" "$ssp_file" "$etc_ssp" 2>/dev/null
-            read -rp "Do you want to retry? (y/n): " retry
-            if [[ "$retry" =~ ^[Yy]$ ]]; then
-                uninstall
-            else
-                exit 1 # Exit by cancellation
-            fi
-        fi
+        sudo dpkg -r ssp
     else
         echo "Uninstallation cancelled."
-        exit 1 # Exit by cancellation
+        exit 1 # Salida por cancelacion
     fi
 }
 case "$1" in
@@ -41,9 +23,10 @@ case "$1" in
         echo "  -c, --config     Edit configuration file"
         echo "  -l  --logs       Open logs folder"
         echo "  -u, --uninstall  Desinstala el servicio y archivos relacionados"
+        echo " man, man ssp      Abre el manual del servicio"
         ;;
     -v|--version)
-        echo "V2.0.0"
+        echo "V0.0.0"
         ;;
     -c|--config)
         sudo nano "$config_file"
@@ -54,13 +37,13 @@ case "$1" in
         python "$ssp_files/service.py"
         ;;
     -l|--logs)
-        cd "/var/log/ssp/" && ll
+        cd "/var/log/ssp/" && ls -l
         ;;
     -u|--uninstall)
         uninstall
         ;;
     *)
         echo "Error: $1"
-        exit 1 # Exit by cancellation
+        exit 1 # Salida por cancelacion
         ;;
 esac
