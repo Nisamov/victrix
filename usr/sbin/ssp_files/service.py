@@ -107,21 +107,18 @@ while True:
             # Generar log por dia, al terminar el dia, se genera un nuevo log (solo si se han detectado servicios que eliminar)
 
                 now = datetime.now()
-                log_filename = now.strftime("%Y_%m_%d_%H_%M.log")
+                log_filename = var_log_deb / now.strftime("%Y_%m_%d_%H_%M.log")
                 with open(log_filename, "a") as log_file:
                     for service in extras:
                         try:
                             subprocess.run(["systemctl", "stop", service], check=True)
                             subprocess.run(["systemctl", "disable", service], check=True)
                             print(f"Service {service} stopped and disabled.")
-                            # Obtener ruta del servicio
                             result_path = subprocess.run(
                                 ["systemctl", "show", service, "-p", "FragmentPath"],
                                 capture_output=True, text=True, check=True
                             )
-                            # La salida es algo como: FragmentPath=/lib/systemd/system/servicio.service
                             ruta_servicio = result_path.stdout.strip().split('=', 1)[1] if '=' in result_path.stdout else "Unknown"
-                            # Escribir en el log en el formato solicitado
                             log_file.write(f"stopped/{service}/{ruta_servicio}\n")
                         except subprocess.CalledProcessError as e:
                             print(f"Failed to stop or disable service {service}: {e}")

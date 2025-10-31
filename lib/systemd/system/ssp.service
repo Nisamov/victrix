@@ -21,7 +21,6 @@ ProtectControlGroups=yes
 RestrictRealtime=yes
 CapabilityBoundingSet=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
 AmbientCapabilities=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
-RefuseManualStop=yes
 
 [Install]
 WantedBy=multi-user.target
