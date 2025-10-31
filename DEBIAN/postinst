@@ -22,6 +22,7 @@ echo "Aplicando permisos..."
 #Configuraciones de permisos
 sudo chmod 755 /lib/systemd/system/ssp.service
 sudo chmod 755 /usr/sbin/ssp
+sudo chmod +x /usr/sbin/ssp_files/service.py
 
 # Final Postinst
 echo "Postinst terminado"

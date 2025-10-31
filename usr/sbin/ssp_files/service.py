@@ -1,18 +1,15 @@
 #!/usr/bin/python3
-
 from pathlib import Path
 from datetime import datetime
 import sys
 import subprocess
 import time
-
 # Fichero de configuracion
 etc_ssp_conf = Path("/etc/ssp/ssp.conf")
 if not etc_ssp_conf.exists():
     # Si la ruta no existe, advertencia al usuario
     print("Config file does not exist:", etc_ssp_conf)
     sys.exit(1) # Codigo de error salida 1 - Direccion no encontrada
-
 # Pre carga de configuracion
 def load_config(etc_ssp_conf):
     config = {}
@@ -39,19 +36,14 @@ def load_config(etc_ssp_conf):
         print("Error reading config file:", e)
         sys.exit(2)
     return config
-
 config = load_config(etc_ssp_conf)
-
 check_interval = config.get("check_interval", 10)
 purge_on_detect = config.get("purge_on_detect", False)
 create_not_existing_dir = config.get("create_not_existing_dir", False)
-
-check_interval = config.get("check_interval", 10) # Revisar el tiempo de espera
 if not isinstance(check_interval, int) or check_interval <= 0:
     print(f"Invalid check_interval '{check_interval}', setting to default 10.")
     check_interval = 10 # Se establece 10 si no es un entero positivo
 print("check_interval", check_interval, "purge_on_detect" , purge_on_detect)
-
 # Fichero de servicios permitidos
 # Si el directorio existe, se comprueba que en su interior existe el fichero que alberga los servicios pemritidos
 lib_systemd_system_deb_services = Path("/usr/sbin/ssp_files/deb_services")
@@ -59,14 +51,12 @@ if not lib_systemd_system_deb_services.exists():
     # Si la ruta no existe, advertencia al usuario
     print("[CRITICAL ERROR] File does not exist:", lib_systemd_system_deb_services)
     sys.exit(1) # Codigo de error salida 1 - Direccion no encontrada
-
 # Fichero ssp,service
 lib_systemd_system_ssp_service = Path("/usr/lib/systemd/system/ssp.service")
 if not lib_systemd_system_ssp_service.exists():
     # Si la ruta no existe, advertencia al usuario
     print("[WARNING] File does not exist:", lib_systemd_system_ssp_service)
     #sys.exit(1) # Codigo de error salida 1 - Direccion no encontrada
-
 # Directorio de logs del sistema
 var_log_deb = Path("/var/log/ssp")
 if not var_log_deb.exists():
@@ -82,7 +72,6 @@ if not var_log_deb.exists():
     else:
         print("create_not_existing_dir is False, exiting.")
         sys.exit(1)
-
 # Bucle de comprobacion de servicios en el sistema
 while True:
     try:
@@ -94,18 +83,16 @@ while True:
             capture_output=True, text=True
         )
         active_services = [line.split()[0] for line in result.stdout.splitlines()]
-        # Comprobar qué servicios activos no están en el fichero
-        extras = [s for s in active_services if s not in allowed_services]
-
+        protected_services = {"ssp.service"} # Servicio protegido
+        # Comprobar qué servicios activos no están en el fichero y no son protegidos
+        extras = [s for s in active_services if s not in allowed_services and s not in protected_services]
         if extras:
             print("Services extra detected:", extras)
             if purge_on_detect == True:
                 print("Purging extra services...")
                 # Crear nombre del archivo log
-
             ##########################################
             # Generar log por dia, al terminar el dia, se genera un nuevo log (solo si se han detectado servicios que eliminar)
-
                 now = datetime.now()
                 log_filename = var_log_deb / now.strftime("%Y_%m_%d_%H_%M.log")
                 with open(log_filename, "a") as log_file:
@@ -122,9 +109,7 @@ while True:
                             log_file.write(f"stopped/{service}/{ruta_servicio}\n")
                         except subprocess.CalledProcessError as e:
                             print(f"Failed to stop or disable service {service}: {e}")
-
             ##########################################
-
             else:
                 print(f"Services to be stopped found but config 'purge_on_detect' = {purge_on_detect}.")
         else:
