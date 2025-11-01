@@ -8,8 +8,8 @@ systemctl disable ssp.service
 # Eliminacion de rutas del sistema
 echo "Eliminando directorios del sistema..."
 sudo rm -rf /usr/sbin/ssp_files
+sudo rm -f /usr/sbin/ssp
 sudo rm -f /share/man/man8/ssp.8
 sudo rm -rf /var/log/ssp
 sudo rm -rf /lib/systemd/system/ssp.service
-sudo rm -f /usr/sbin/ssp
 exit 0

@@ -58,7 +58,7 @@ if not lib_systemd_system_ssp_service.exists():
     print("[WARNING] File does not exist:", lib_systemd_system_ssp_service)
     #sys.exit(1) # Codigo de error salida 1 - Direccion no encontrada
 # Directorio de logs del sistema
-var_log_deb = Path("/var/log/ssp")
+var_log_deb = Path("/var/log/ssp/")
 if not var_log_deb.exists():
     # Si la ruta no existe, advertencia al usuario
     print("[WARNING] File does not exist:", var_log_deb)

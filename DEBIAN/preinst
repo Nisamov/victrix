@@ -23,4 +23,7 @@ else
     echo "Python 3 ya está instalado."
 fi
 
+# Creacion de rutas
+sudo mkdir -p "/var/log/ssp/"
+
 exit 0
