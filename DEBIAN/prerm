@@ -1,15 +1,50 @@
 #!/bin/bash
-set -e
-# Detener el servicio antes de desinstalar
-echo "Deteniendo y deshabilitando servicio..."
-systemctl stop ssp.service
-systemctl disable ssp.service
+set -euo pipefail
 
-# Eliminacion de rutas del sistema
-echo "Eliminando directorios del sistema..."
-sudo rm -rf /usr/sbin/ssp_files
-sudo rm -f /usr/sbin/ssp
-sudo rm -f /share/man/man8/ssp.8
-sudo rm -rf /var/log/ssp
-sudo rm -rf /lib/systemd/system/ssp.service
+# prerm: se ejecuta antes de la eliminación del paquete
+# Detener y deshabilitar servicio de forma segura si systemctl está disponible
+if command -v systemctl >/dev/null 2>&1; then
+    echo "Deteniendo y deshabilitando ssp.service si existe..."
+    # Intentar parar (no fallar si no está activo)
+    systemctl stop ssp.service >/dev/null 2>&1 || true
+    # Intentar deshabilitar (no fallar si no está habilitado)
+    systemctl disable ssp.service >/dev/null 2>&1 || true
+else
+    echo "systemctl no disponible: saltando parada/deshabilitado del servicio."
+fi
+
+# Eliminación segura de rutas del sistema (solo si existen)
+echo "Eliminando archivos y directorios instalados por el paquete (si existen)..."
+
+if [ -d "/usr/sbin/ssp_files" ]; then
+    rm -rf "/usr/sbin/ssp_files"
+    echo "Eliminado /usr/sbin/ssp_files"
+fi
+
+if [ -f "/usr/sbin/ssp" ]; then
+    rm -f "/usr/sbin/ssp"
+    echo "Eliminado /usr/sbin/ssp"
+fi
+
+# Ruta de manual corregida
+if [ -f "/usr/share/man/man8/ssp.8" ]; then
+    rm -f "/usr/share/man/man8/ssp.8"
+    echo "Eliminado /usr/share/man/man8/ssp.8"
+fi
+
+if [ -d "/var/log/ssp" ]; then
+    rm -rf "/var/log/ssp"
+    echo "Eliminado /var/log/ssp"
+fi
+
+if [ -f "/lib/systemd/system/ssp.service" ]; then
+    rm -f "/lib/systemd/system/ssp.service"
+    echo "Eliminado /lib/systemd/system/ssp.service"
+fi
+
+# Recargar systemd para que tenga en cuenta la eliminación de la unidad
+if command -v systemctl >/dev/null 2>&1; then
+    systemctl daemon-reload >/dev/null 2>&1 || true
+fi
+
 exit 0
