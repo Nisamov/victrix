@@ -1,4 +1,7 @@
 #!/bin/bash
+
+whitelist="/usr/sbin/ssp_files/deb_services"
+
 set -euo pipefail
 
 # Limpieza de consola (opcional)
@@ -23,6 +26,36 @@ elif [ -f "./LICENSE" ]; then
 else
     echo "WARNING: LICENSE not found. Skipping license installation."
 fi
+
+# Preguntar al usuario si desea agregar servicios de usuario (altamente recomendado)
+read -p "Usuario '$user' detectado, ¿desea agregarlo a la lista blanca? (recomendado) [s/n]: " response
+response=$(echo "$response" | tr '[:upper:]' '[:lower:]')
+if [[ "$response" == "s" || "$response" == "si" ]]; then
+    echo "Agregando servicios del usuario '$user' a la lista blanca..."
+    # Agregar servicios user@ y user-runtime-dir@
+    systemctl list-units --type=service --state=active --no-legend \
+      | awk '{print $1}' \
+      | grep -E '^user(@|-runtime-dir@)[0-9]+\.service$' \
+      >> "$whitelist"
+    echo "Servicios agregados correctamente a: $whitelist"
+else
+    echo "[PELIGRO] Podría tener problemas para iniciar sesión si no agrega los servicios de usuario."
+    read -p "¿Está seguro de que NO desea agregarlos a la lista blanca? [s/n]: " confirm_response
+    confirm_response=$(echo "$confirm_response" | tr '[:upper:]' '[:lower:]')
+    if [[ "$confirm_response" == "n" || "$confirm_response" == "no" ]]; then
+        echo "Agregando servicios del usuario '$user' a la lista blanca (por seguridad)..."
+
+        systemctl list-units --type=service --state=active --no-legend \
+          | awk '{print $1}' \
+          | grep -E '^user(@|-runtime-dir@)[0-9]+\.service$' \
+          >> "$whitelist"
+
+        echo "Servicios agregados correctamente a: $whitelist"
+    else
+        echo "No se agregaron servicios. Procediendo bajo su responsabilidad..."
+    fi
+fi
+
 
 # Recargar systemd y desplegar el servicio
 echo "Recargando systemd y habilitando servicio..."
