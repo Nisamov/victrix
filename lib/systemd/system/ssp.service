@@ -5,14 +5,12 @@ After=network.target
 [Service]
 Type=simple
 ExecStart=/usr/bin/python3 /usr/sbin/ssp_files/service.py
-CPUSchedulingPolicy=rr
-CPUSchedulingPriority=99
-CapabilityBoundingSet=CAP_SYS_ADMIN CAP_NET_ADMIN
 WorkingDirectory=/usr/sbin/ssp_files
-Restart=always
 User=root
+
 ProtectSystem=full
-ProtectHome=yes
+ReadWritePaths=/var/log/ssp
+ProtectHome=read-only
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectKernelModules=yes
@@ -21,6 +19,14 @@ ProtectControlGroups=yes
 RestrictRealtime=yes
 CapabilityBoundingSet=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
 AmbientCapabilities=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
+
+CPUSchedulingPolicy=rr
+CPUSchedulingPriority=99
+
+StandardOutput=append:/var/log/ssp/ssp.log
+StandardError=append:/var/log/ssp/ssp_error.log
+
+Restart=always
 
 [Install]
 WantedBy=multi-user.target

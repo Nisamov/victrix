@@ -1,28 +1,60 @@
 #!/bin/bash
-# Limpieza de consola
-clear
+set -euo pipefail
 
-# Inicio postinst
+# Limpieza de consola (opcional)
+# clear
+
 echo "Iniciando postinst"
 
-# Licencia de servicio
-echo "Clonando Licencia..."
-sudo cp ../LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
+# Crear directorio para archivos del servicio si no existe
+install -d -m 0755 /usr/sbin/ssp_files
 
-echo "Iniciando y habilitando servicio..."
+# Instalar la licencia en /usr/sbin/ssp_files como LICENCIA_Apache2.0
+# Intentar varias rutas relativas/ya instaladas para mayor robustez
+if [ -f "../LICENSE" ]; then
+    install -m 0644 ../LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
+    echo "License installed from ../LICENSE"
+elif [ -f "/usr/sbin/ssp_files/LICENSE" ]; then
+    install -m 0644 /usr/sbin/ssp_files/LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
+    echo "License installed from /usr/sbin/ssp_files/LICENSE"
+elif [ -f "./LICENSE" ]; then
+    install -m 0644 ./LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
+    echo "License installed from ./LICENSE"
+else
+    echo "WARNING: LICENSE not found. Skipping license installation."
+fi
 
-# Configuraciones de servicio
-systemctl daemon-reload
-systemctl unmask ssp.service
-systemctl enable ssp.service
-systemctl start ssp.service
+# Recargar systemd y desplegar el servicio
+echo "Recargando systemd y habilitando servicio..."
+# daemon-reload puede fallar si no hay privilegios; en postinst normalmente corre como root
+systemctl daemon-reload || true
+systemctl unmask ssp.service || true
+# Intentar habilitar y arrancar el servicio inmediatamente
+if systemctl enable --now ssp.service; then
+    echo "ssp.service habilitado y arrancado."
+else
+    echo "WARNING: No se pudo habilitar o arrancar ssp.service. Comprueba los logs de systemd."
+fi
 
 echo "Aplicando permisos..."
+# Aplicar permisos de forma condicional (no fallar si los archivos no existen)
+if [ -f "/lib/systemd/system/ssp.service" ]; then
+    chmod 0644 /lib/systemd/system/ssp.service
+else
+    echo "Aviso: /lib/systemd/system/ssp.service no encontrado."
+fi
 
-#Configuraciones de permisos
-sudo chmod 755 /lib/systemd/system/ssp.service
-sudo chmod 755 /usr/sbin/ssp
-sudo chmod +x /usr/sbin/ssp_files/service.py
+if [ -f "/usr/sbin/ssp" ]; then
+    chmod 0755 /usr/sbin/ssp
+else
+    echo "Aviso: /usr/sbin/ssp no encontrado."
+fi
 
-# Final Postinst
+if [ -f "/usr/sbin/ssp_files/service.py" ]; then
+    chmod 0755 /usr/sbin/ssp_files/service.py
+else
+    echo "Aviso: /usr/sbin/ssp_files/service.py no encontrado."
+fi
+
 echo "Postinst terminado"
+exit 0

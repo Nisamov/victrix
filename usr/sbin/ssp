@@ -1,55 +1,108 @@
 #!/bin/bash
 
-ssp_files="/usr/local/sbin/ssp_files"
-config_file="/etc/ssp.conf"
+# Rutas corregidas para que coincidan con el paquete
+ssp_files="/usr/sbin/ssp_files"
+config_file="/etc/ssp/ssp.conf"
+LOG_DIR="/var/log/ssp"
 
 ROJO='\033[0;31m'
 NC='\033[0m' # Sin color
 AMARILLO='\033[1;33m'
 
+# Ejecutar comando como root si no estamos ya como root
+run_as_root() {
+    if [ "$(id -u)" -eq 0 ]; then
+        "$@"
+    else
+        sudo "$@"
+    fi
+}
+
 uninstall() {
     read -rp "Estás seguro de querer desinstalar el servicio? (y/n): " confirmation
     if [[ "$confirmation" =~ ^[Yy]$ ]]; then
         echo -e "${ROJO}Se ha iniciado la desinstalación de SSP${NC}"
-        sudo systemctl stop ssp
-        sudo systemctl disable ssp
-        sudo dpkg -r ssp
-        echo "Saltando al prerm..."
+        # Parar y deshabilitar el servicio (usar nombre completo .service)
+        run_as_root systemctl stop ssp.service || true
+        run_as_root systemctl disable ssp.service || true
+        # Quitar el paquete
+        run_as_root dpkg -r ssp || {
+            echo "Error: no se pudo desinstalar el paquete ssp con dpkg."
+            return 1
+        }
+        echo "Desinstalación iniciada. Revisa prerm para limpieza adicional."
     else
         echo -e "${ROJO}Desinstalación cancelada.${NC}"
-        exit 1 # Salida por cancelacion
+        return 1
     fi
 }
+
+show_help() {
+    cat <<EOF
+Opciones disponibles:
+  -h, --help       Mostrar ayuda
+  -v, --version    Mostrar versión
+  -c, --config     Editar el fichero de configuración (/etc/ssp/ssp.conf)
+  -e, --execute    Ejecutar el servicio manualmente (python3)
+  -l, --logs       Listar el directorio de logs ($LOG_DIR)
+  -u, --uninstall  Desinstala el servicio y archivos relacionados
+  man               Abre el manual del servicio (man ssp) si existe
+EOF
+}
+
+# Si no se pasa argumento, mostrar ayuda
+if [ "$#" -eq 0 ]; then
+    show_help
+    exit 0
+fi
+
 case "$1" in
     -h|--help)
-        echo "Opciones disponibles:"
-        echo "  -h, --help       Mostrar ayuda"
-        echo "  -v, --version    Mostrar versión"
-        echo "  -c, --config     Editar el fichero de configuración"
-        echo "  -l  --logs       Abrir directorio de logs"
-        echo "  -u, --uninstall  Desinstala el servicio y archivos relacionados"
-        echo " man,              Abre el manual del servicio"
+        show_help
         ;;
     -v|--version)
         echo "V0.0.0"
         ;;
     -c|--config)
-        sudo nano "$config_file"
-        #vim "$config_file"
+        if [ -f "$config_file" ]; then
+            run_as_root ${EDITOR:-nano} "$config_file"
+        else
+            echo "Config file not found: $config_file"
+            exit 1
+        fi
         ;;
     -e|--execute)
-        #Ejecucion manual de servicio
-        python "$ssp_files/service.py"
+        # Ejecucion manual de servicio con python3
+        if [ -x "$ssp_files/service.py" ] || [ -f "$ssp_files/service.py" ]; then
+            python3 "$ssp_files/service.py"
+        else
+            echo "No se encuentra el servicio en: $ssp_files/service.py"
+            exit 1
+        fi
         ;;
     -l|--logs)
-        cd "/var/log/ssp/" && ls -l
+        if [ -d "$LOG_DIR" ]; then
+            ls -l "$LOG_DIR"
+        else
+            echo "No se encontró el directorio de logs: $LOG_DIR"
+            echo "Intenta crear el directorio con sudo mkdir -p $LOG_DIR o revisa la configuración."
+            exit 1
+        fi
         ;;
     -u|--uninstall)
         uninstall
         ;;
+    man)
+        if man ssp >/dev/null 2>&1; then
+            man ssp
+        else
+            echo "Manual (man) no encontrado para 'ssp'."
+            exit 1
+        fi
+        ;;
     *)
         echo -e "Error: ${ROJO}'$1'${NC} - Carácter no válido"
         echo -e "Prueba ${AMARILLO}'ssp --help'${NC} o ${AMARILLO}'man ssp'${NC}."
-        exit 1 # Salida por cancelacion
+        exit 1
         ;;
 esac

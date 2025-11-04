@@ -1,26 +1,47 @@
 #!/bin/bash
-set -e
+set -euo pipefail
 
-echo "Revisando Python 3..."
+echo "Running preinst for ssp"
 
-# Verificar si python3 está disponible
-if ! command -v python3 >/dev/null 2>&1; then
-    echo "Python 3 no está instalado."
-    
-    # Preguntar al usuario si quiere instalarlo
-    echo "El servicio SSP require de Python3 para funcionar"
-    read -rp "¿Descargar Python 3? (y/n): " answer
-    if [[ "$answer" =~ ^[Yy]$ ]]; then
-        echo "Instalando Python 3..."
-        # Usar apt para instalar
-        sudo apt update
-        sudo apt install -y python3
+# Comprobar si python3 está disponible
+if command -v python3 >/dev/null 2>&1; then
+    echo "Python3 found: $(python3 --version 2>&1)"
+else
+    echo "Python3 not found."
+    # Para evitar prompts durante la instalación del paquete, permitimos instalación automática
+    # solo si la variable de entorno SSP_ALLOW_INSTALL_PYTHON=yes está definida.
+    if [ "${SSP_ALLOW_INSTALL_PYTHON:-no}" = "yes" ]; then
+        if [ "$(id -u)" -ne 0 ]; then
+            echo "ERROR: Not running as root; cannot install python3. Please install python3 manually or rerun as root."
+            exit 1
+        fi
+        if command -v apt-get >/dev/null 2>&1; then
+            echo "Installing python3 non-interactively using apt-get..."
+            export DEBIAN_FRONTEND=noninteractive
+            apt-get update -y || { echo "apt-get update failed"; exit 1; }
+            apt-get install -y python3 || { echo "apt-get install python3 failed"; exit 1; }
+            echo "python3 installed."
+        else
+            echo "ERROR: apt-get not available. Please install python3 manually."
+            exit 1
+        fi
     else
-        echo "Python 3 es necesario para el servicio, cancelando instalación."
+        echo "Python3 is required. To allow automatic installation during package install set SSP_ALLOW_INSTALL_PYTHON=yes in the environment, or install python3 manually before installing this package."
         exit 1
     fi
-else
-    echo "Python 3 ya está instalado."
 fi
+
+# Crear directorio de logs de forma segura (sin sudo)
+LOG_DIR="/var/log/ssp"
+if [ ! -d "$LOG_DIR" ]; then
+    echo "Creating log directory: $LOG_DIR"
+    install -d -m 0755 "$LOG_DIR"
+else
+    echo "Log directory exists: $LOG_DIR"
+fi
+
+# Asegurar que el propietario sea root y permisos adecuados
+chown root:root "$LOG_DIR" || true
+chmod 0755 "$LOG_DIR" || true
 
 exit 0
