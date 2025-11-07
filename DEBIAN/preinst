@@ -39,30 +39,6 @@ else
     echo "Log directory exists: $LOG_DIR"
 fi
 
-# Se habilita el primer usuario que instala el servicio por uuid
-for svc in "user-runtime-dir@${localuseruid}.service" "user@${localuseruid}.service"; do
-    if ! grep -qxF "$svc" "$whitelist" 2>/dev/null; then
-        echo "$svc" >> "$whitelist"
-        echo "Añadido: $svc"
-    else
-        echo "Ya existe: $svc"
-    fi
-done
-
-# Instalar la licencia en /usr/sbin/ssp_files como LICENCIA_Apache2.0
-if [ -f "../LICENSE" ]; then
-    install -m 0644 ../LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
-    echo "Licencia instalada desde ../LICENSE"
-elif [ -f "/usr/sbin/ssp_files/LICENSE" ]; then
-    install -m 0644 /usr/sbin/ssp_files/LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
-    echo "Licencia instalada desde /usr/sbin/ssp_files/LICENSE"
-elif [ -f "./LICENSE" ]; then
-    install -m 0644 ./LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
-    echo "Licencia instalada desde ./LICENSE"
-else
-    echo "WARNING: Licencia no encontrada; omitiendo instalación de la licencia."
-fi
-
 echo "Configurando hook de actualización automática para SSP..."
 if [ "$(id -u)" -ne 0 ]; then
     echo "No se puede configurar el hook APT sin privilegios de root."
@@ -87,6 +63,16 @@ EOF
     chmod 0644 "$APT_HOOK_PATH"
     echo "Hook APT configurado en $APT_HOOK_PATH"
 fi
+
+# Se habilita el primer usuario que instala el servicio por uuid
+for svc in "user-runtime-dir@${localuseruid}.service" "user@${localuseruid}.service"; do
+    if ! grep -qxF "$svc" "$whitelist" 2>/dev/null; then
+        echo "$svc" >> "$whitelist"
+        echo "Añadido: $svc"
+    else
+        echo "Ya existe: $svc"
+    fi
+done
 
 chown root:root "$LOG_DIR" || true
 chmod 0755 "$LOG_DIR" || true
