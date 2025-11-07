@@ -28,13 +28,13 @@ fi
 if [ -f "/usr/sbin/ssp" ]; then
     chmod 0755 /usr/sbin/ssp
 else
-     -e "${AMARILLO}ADVERTENCIA${NC}: /usr/sbin/ssp no encontrado."
+    echo -e "${AMARILLO}ADVERTENCIA${NC}: /usr/sbin/ssp no encontrado."
 fi
 
 if [ -f "/usr/sbin/ssp_files/service.py" ]; then
     chmod 0755 /usr/sbin/ssp_files/service.py
 else
-     -e "${AMARILLO}ADVERTENCIA${NC}: /usr/sbin/ssp_files/service.py no encontrado."
+    echo -e "${AMARILLO}ADVERTENCIA${NC}: /usr/sbin/ssp_files/service.py no encontrado."
 fi
 
 echo "Postinst terminado"

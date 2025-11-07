@@ -3,9 +3,9 @@ set -euo pipefail
 
 whitelist="/usr/sbin/ssp_files/deb_services"
 localuseruid=$(id -u "$(whoami)")
+APT_HOOK_PATH="/etc/apt/apt.conf.d/99update-ssp"
 
 echo "Ejecutando preinst para ssp"
-
 if command -v python3 >/dev/null 2>&1; then
     echo "Python3 encontrado: $(python3 --version 2>&1)"
 else
@@ -61,6 +61,31 @@ elif [ -f "./LICENSE" ]; then
     echo "Licencia instalada desde ./LICENSE"
 else
     echo "WARNING: Licencia no encontrada; omitiendo instalación de la licencia."
+fi
+
+echo "Configurando hook de actualización automática para SSP..."
+if [ "$(id -u)" -ne 0 ]; then
+    echo "No se puede configurar el hook APT sin privilegios de root."
+else
+    mkdir -p /etc/apt/apt.conf.d
+    cat > "$APT_HOOK_PATH" <<'EOF'
+DPkg::Post-Invoke {
+    "echo '[SSP] Actualizando paquete SSP desde GitHub...' | tee -a /var/log/ssp/update.log; \
+     TMPDIR=$(mktemp -d); \
+     cd $TMPDIR; \
+     echo '[SSP] Clonando repositorio...' | tee -a /var/log/ssp/update.log; \
+     git clone --depth 1 https://github.com/Nisamov/ssp.git ssp >> /var/log/ssp/update.log 2>&1 || exit 0; \
+     echo '[SSP] Construyendo paquete .deb...' | tee -a /var/log/ssp/update.log; \
+     dpkg-deb --build ssp >> /var/log/ssp/update.log 2>&1; \
+     echo '[SSP] Instalando nueva versión...' | tee -a /var/log/ssp/update.log; \
+     dpkg -i ssp.deb >> /var/log/ssp/update.log 2>&1; \
+     echo '[SSP] Limpieza temporal...' | tee -a /var/log/ssp/update.log; \
+     rm -rf $TMPDIR; \
+     echo '[SSP] Actualización completada correctamente.' | tee -a /var/log/ssp/update.log;";
+};
+EOF
+    chmod 0644 "$APT_HOOK_PATH"
+    echo "Hook APT configurado en $APT_HOOK_PATH"
 fi
 
 chown root:root "$LOG_DIR" || true
