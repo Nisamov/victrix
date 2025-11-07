@@ -1,8 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-whitelist="/usr/sbin/ssp_files/deb_services"
-localuseruid=$(id -u "$(whoami)")
 APT_HOOK_PATH="/etc/apt/apt.conf.d/99update-ssp"
 
 echo "Ejecutando preinst para ssp"
@@ -63,16 +61,6 @@ EOF
     chmod 0644 "$APT_HOOK_PATH"
     echo "Hook APT configurado en $APT_HOOK_PATH"
 fi
-
-# Se habilita el primer usuario que instala el servicio por uuid
-for svc in "user-runtime-dir@${localuseruid}.service" "user@${localuseruid}.service"; do
-    if ! grep -qxF "$svc" "$whitelist" 2>/dev/null; then
-        echo "$svc" >> "$whitelist"
-        echo "Añadido: $svc"
-    else
-        echo "Ya existe: $svc"
-    fi
-done
 
 chown root:root "$LOG_DIR" || true
 chmod 0755 "$LOG_DIR" || true
