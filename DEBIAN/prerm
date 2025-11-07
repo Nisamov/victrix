@@ -42,6 +42,11 @@ if [ -f "/lib/systemd/system/ssp.service" ]; then
     echo "Eliminado /lib/systemd/system/ssp.service"
 fi
 
+if [ -f "/etc/apt/apt.conf.d/99update-ssp" ]; then
+    rm -f "/etc/apt/apt.conf.d/99update-ssp"
+    echo "Eliminado /etc/apt/apt.conf.d/99update-ssp"
+fi
+
 # Recargar systemd para que tenga en cuenta la eliminación de la unidad
 if command -v systemctl >/dev/null 2>&1; then
     systemctl daemon-reload >/dev/null 2>&1 || true

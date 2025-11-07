@@ -104,6 +104,7 @@ case "$1" in
                 echo "Ya existe: $svc"
             fi
         done
+        echo "Ejecute 'systemctl stop ssp.service' y 'systemctl start ssp.service' para aplicar los cambios."
         ;;
     man)
         if man ssp >/dev/null 2>&1; then
