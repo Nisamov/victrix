@@ -418,8 +418,6 @@ upower.service
 usb-gadget.target
 usb_modeswitch@.service
 usbmuxd.service
-user@0.service.d
-user-runtime-dir@.service
 user@.service
 user@.service.d
 user.slice

@@ -1,96 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-whitelist="/usr/sbin/ssp_files/deb_services"
-
-# Determinar el usuario invocador (SUDO_USER si existe, si no logname)
-invoking_user="${SUDO_USER:-$(logname 2>/dev/null || true)}"
-
-# Crear directorio para archivos del servicio si no existe
-install -d -m 0755 /usr/sbin/ssp_files
-
-echo "Iniciando postinst"
-
-# Instalar la licencia en /usr/sbin/ssp_files como LICENCIA_Apache2.0
-if [ -f "../LICENSE" ]; then
-    install -m 0644 ../LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
-    echo "License installed from ../LICENSE"
-elif [ -f "/usr/sbin/ssp_files/LICENSE" ]; then
-    install -m 0644 /usr/sbin/ssp_files/LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
-    echo "License installed from /usr/sbin/ssp_files/LICENSE"
-elif [ -f "./LICENSE" ]; then
-    install -m 0644 ./LICENSE /usr/sbin/ssp_files/LICENCIA_Apache2.0
-    echo "License installed from ./LICENSE"
-else
-    echo "WARNING: LICENSE not found. Skipping license installation."
-fi
-
-# Función para añadir servicios de usuario activos a la whitelist de forma idempotente
-add_user_services() {
-    local user="$1"
-    local tmpfile
-    tmpfile=$(mktemp)
-
-    if ! command -v systemctl >/dev/null 2>&1; then
-        echo "systemctl no disponible: no se pueden detectar servicios de usuario."
-        rm -f "$tmpfile"
-        return 0
-    fi
-
-    echo "Detectando servicios de usuario activos para '$user'..."
-    # Listar unidades activas y filtrar las que corresponden a user@<uid>.service o user-runtime-dir@<uid>.service
-    systemctl list-units --type=service --state=active --no-legend \
-        | awk '{print $1}' \
-        | grep -E '^(user@|user-runtime-dir@)[0-9]+\.service$' \
-        > "$tmpfile" || true
-
-    # Si no se detectó ninguno, salir
-    if [ ! -s "$tmpfile" ]; then
-        echo "No se detectaron servicios de usuario activos."
-        rm -f "$tmpfile"
-        return 0
-    fi
-
-    # Asegurarse de que el fichero whitelist exista
-    touch "$whitelist"
-    chmod 0644 "$whitelist" || true
-
-    # Combinar, ordenar y dejar único
-    cat "$whitelist" "$tmpfile" | sed '/^$/d' | sort -u > "${tmpfile}.out"
-    mv "${tmpfile}.out" "$whitelist"
-    echo "Servicios agregados correctamente a: $whitelist"
-    rm -f "$tmpfile"
-}
-
-# Decidir si añadimos servicios de usuario:
-# - Si SE establece SSP_ADD_USER_SERVICES=yes en el entorno, lo hacemos sin preguntar.
-# - Si estamos en modo no interactivo (DEBIAN_FRONTEND=noninteractive) se omite.
-# - Si estamos en una sesión interactiva (tty) preguntamos al usuario indicado.
-
-if [ "${SSP_ADD_USER_SERVICES:-no}" = "yes" ]; then
-    if [ -n "$invoking_user" ]; then
-        add_user_services "$invoking_user"
-    else
-        echo "No se detectó usuario invocador; omitiendo adición automática de servicios de usuario."
-    fi
-else
-    if [ "${DEBIAN_FRONTEND:-}" = "noninteractive" ] || [ ! -t 0 ]; then
-        echo "Instalación no interactiva: omitiendo prompt para agregar servicios de usuario. Para forzar la adición, exporte SSP_ADD_USER_SERVICES=yes antes de la instalación."
-    else
-        # Interactivo: preguntar al usuario si hay un invoking_user válido
-        if [ -n "$invoking_user" ]; then
-            read -r -p "Usuario '$invoking_user' detectado, ¿desea agregar sus servicios a la lista blanca? (recomendado) [s/N]: " response
-            response="$(echo "$response" | tr '[:upper:]' '[:lower:]')"
-            if [[ "$response" == "s" || "$response" == "si" ]]; then
-                add_user_services "$invoking_user"
-            else
-                echo "No se agregaron servicios de usuario. Procediendo."
-            fi
-        else
-            echo "No se pudo determinar el usuario invocador; omitiendo prompt para agregar servicios de usuario."
-        fi
-    fi
-fi
+NC='\033[0m' # Sin color
+AMARILLO='\033[1;33m'
 
 # Recargar systemd y desplegar el servicio si systemctl está disponible
 if command -v systemctl >/dev/null 2>&1; then
@@ -100,10 +12,10 @@ if command -v systemctl >/dev/null 2>&1; then
     if systemctl enable --now ssp.service; then
         echo "ssp.service habilitado y arrancado."
     else
-        echo "WARNING: No se pudo habilitar o arrancar ssp.service. Comprueba los logs de systemd."
+        echo -e "${AMARILLO}ADVERTENCIA${NC}: No se pudo habilitar o arrancar ssp.service. Comprueba los logs de systemd."
     fi
 else
-    echo "systemctl no disponible: omitiendo habilitación/arranque del servicio."
+    echo -e "${AMARILLO}ADVERTENCIA${NC}: systemctl no disponible: omitiendo habilitación/arranque del servicio."
 fi
 
 # Aplicar permisos de forma condicional (no fallar si los archivos no existen)
@@ -116,13 +28,13 @@ fi
 if [ -f "/usr/sbin/ssp" ]; then
     chmod 0755 /usr/sbin/ssp
 else
-    echo "Aviso: /usr/sbin/ssp no encontrado."
+     -e "${AMARILLO}ADVERTENCIA${NC}: /usr/sbin/ssp no encontrado."
 fi
 
 if [ -f "/usr/sbin/ssp_files/service.py" ]; then
     chmod 0755 /usr/sbin/ssp_files/service.py
 else
-    echo "Aviso: /usr/sbin/ssp_files/service.py no encontrado."
+     -e "${AMARILLO}ADVERTENCIA${NC}: /usr/sbin/ssp_files/service.py no encontrado."
 fi
 
 echo "Postinst terminado"
