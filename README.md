@@ -76,11 +76,17 @@ AmbientCapabilities=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
 
 ## Estructura
 ```
-.
+ssp
 ├── DEBIAN
 │   ├── control
 │   ├── postinst
+│   ├── preinst
 │   └── prerm
+├── LICENSE
+├── README.md
+├── _repo
+│   └── _media
+│       └── SecureServiceProtocol.jpg
 ├── etc
 │   └── ssp
 │       └── ssp.conf
@@ -88,19 +94,15 @@ AmbientCapabilities=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
 │   └── systemd
 │       └── system
 │           └── ssp.service
-├── usr
-│   ├── sbin
-│   │   ├── ssp
-│   │   └── ssp_files
-│   │       ├── deb_services
-│   │       ├── funcionamiento.md
-│   │       └── service.py
-│   └── share
-│       └── man
-│           └── man8
-│               └── ssp.8
-└── var
-    └── log
-        └── ssp
-            └── iexist
+└── usr
+    ├── sbin
+    │   ├── ssp
+    │   └── ssp_files
+    │       ├── deb_services
+    │       ├── funcionamiento.md
+    │       └── service.py
+    └── share
+        └── man
+            └── man8
+                └── ssp.8
 ```
