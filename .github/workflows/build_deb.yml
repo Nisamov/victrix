@@ -31,7 +31,9 @@ jobs:
       - name: Set permissions
         run: |
           ls -l ./usr/sbin/
-          chmod 0775 ./DEBIAN/prerm
+          chmod 0755 ./DEBIAN/preinst
+          chmod 0755 ./DEBIAN/postinst
+          chmod 0755 ./DEBIAN/prerm
           chmod +x ./usr/sbin/ssp
 
       - name: List files before creating directory for .deb
