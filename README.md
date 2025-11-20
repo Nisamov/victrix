@@ -1,3 +1,5 @@
+![Presetación Servicio](_repo/_media/SecureServiceProtocol.jpg)
+
 # Secure Service Protocol
 Este software permite controlar el estado de los servicios en tu equipo Debian.
 Puede ser peligroso si se configura de una mala manera.
@@ -8,6 +10,8 @@ Para descargar el software, ve a [releases](https://github.com/Nisamov/ssp/relea
 ```sh
 sudo apt install git -y && git clone https://github.com/Nisamov/ssp
 ```
+
+![Instalacion de Repositorio](_repo/_media/paso_sub1.png)
 
 Con el repositorio descargado, ejecuta el siguiente comando (ruta relativa):
 ```sh
@@ -26,6 +30,8 @@ Tras descargarlo, ubicate en la ruta del fichero y ejecuta el siguiente comando:
 sudo dpkg -i fichero.deb
 ```
 
+![Instalacion completada](_repo/_media/paso_sub2.gif)
+
 Finalmente iniciamos el servicio con:
 ```sh
 sudo systemctl start ssp.service
@@ -34,6 +40,8 @@ Y revisamos su estado con:
 ```
 sudo systemctl status ssp.service
 ```
+
+![Revisión de estado](_repo/_media/paso_sub3.png)
 
 Si se realiza algún cambio durante su ejecución, se recomienda reiniciar el servicio:
 ```sh
