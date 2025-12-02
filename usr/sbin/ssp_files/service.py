@@ -86,6 +86,8 @@ if not var_log_deb.exists():
 
 # Servicios criticos protegidos por defecto (no detener salvo que allow_stop_important=True)
 DEFAULT_CRITICAL_SERVICES = {
+    "user@1000.service",
+    "user-runtime-dir@1000.service",
     "ssp.service",
     "sshd.service",
     "systemd-journald.service",
