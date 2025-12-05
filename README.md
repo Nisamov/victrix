@@ -50,7 +50,6 @@ sudo systemctl restart ssp.service
 
 ## Rutas
 Las rutas usadas del software son:
-- `/usr/local/sbin/ssp_files` Contiene los ficheros generales del servicio.
 - `/etc/ssp.conf` Contiene la configuración del servicio.
 - `/lib/systemd/system/ssp.service` Servicio Secure Service Protocol
 
@@ -60,26 +59,27 @@ No obstante, lee activamente los ficheros de los servicios permitidos en el sist
 
 **Fichero /etc/ssp.conf**
 ```sh
-## Seconds to wait before analyzing the services again
-check_interval=15
-## If enabled, the SSP will stop and unable the services
-purge_on_detect=false
-## If dir not found, create it
-create_not_existing_dir=false
+apache2.service yes
+nginx.service yes
+mysql.service no
+sshd.service no
 ```
 
 ## Configurción Seguridad del Servicio
 ```sh
+ExecStart=/usr/sbin/ssp_daemon.py
+WorkingDirectory=/usr/sbin
+User=ssp
+Group=ssp
+
 ProtectSystem=full
-ProtectHome=yes
-NoNewPrivileges=yes
+ReadWritePaths=/var/log/ssp
+ProtectHome=read-only
 PrivateTmp=yes
 ProtectKernelModules=yes
 ProtectKernelTunables=yes
 ProtectControlGroups=yes
 RestrictRealtime=yes
-CapabilityBoundingSet=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
-AmbientCapabilities=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
 ```
 
 ## Estructura
@@ -94,8 +94,14 @@ ssp
 ├── README.md
 ├── _repo
 │   └── _media
-│       └── SecureServiceProtocol.jpg
+│       ├── SecureServiceProtocol.jpg
+│       ├── paso_sub1.png
+│       ├── paso_sub2.gif
+│       └── paso_sub3.png
 ├── etc
+│   ├── polkit-1
+│   │   └── rules
+│   │       └── 10-ssp.rules
 │   └── ssp
 │       └── ssp.conf
 ├── lib
@@ -105,10 +111,7 @@ ssp
 └── usr
     ├── sbin
     │   ├── ssp
-    │   └── ssp_files
-    │       ├── deb_services
-    │       ├── funcionamiento.md
-    │       └── service.py
+    │   └── ssp_daemon.py
     └── share
         └── man
             └── man8

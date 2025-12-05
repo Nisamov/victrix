@@ -4,6 +4,13 @@ set -euo pipefail
 NC='\033[0m' # Sin color
 AMARILLO='\033[1;33m'
 
+# Crear usuario del sistema si no existe
+if ! id "ssp" >/dev/null 2>&1; then
+    adduser --system --group --no-create-home \
+        --shell /usr/sbin/nologin ssp
+    fi
+;;
+
 # Recargar systemd y desplegar el servicio si systemctl está disponible
 if command -v systemctl >/dev/null 2>&1; then
     echo "Recargando systemd y habilitando servicio..."
@@ -36,6 +43,9 @@ if [ -f "/usr/sbin/ssp_files/service.py" ]; then
 else
     echo -e "${AMARILLO}ADVERTENCIA${NC}: /usr/sbin/ssp_files/service.py no encontrado."
 fi
+
+# Reiniciar polkit para aplicar cambios si está disponible
+systemctl restart polkit || true
 
 echo "Postinst terminado"
 exit 0
