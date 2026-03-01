@@ -1,0 +1,23 @@
+[Unit]
+Description=Servicio Indefinido
+After=network.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/victrix_files/main.tcl
+WorkingDirectory=/usr/sbin/victrix_files
+
+User=victrix
+Group=victrix
+
+Restart=on-failure
+RestartSec=5s
+
+StandardOutput=journal
+StandardError=journal
+
+StandardOutput=append:/var/log/victrix/victrix.log
+StandardError=append:/var/log/victrix/victrix_error.log
+
+[Install]
+WantedBy=multi-user.target

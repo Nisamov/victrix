@@ -1,0 +1,48 @@
+.TH VICTRIX 8 "Marzo 2026" "1.0" "Manual de Victrix"
+.SH NOMBRE
+victrix \- Servicio de control y seguridad basado en Tcl.
+
+.SH SINOPSIS
+.B systemctl
+[\fICOMANDO\fR] victrix.service
+
+.SH DESCRIPCIÓN
+.B victrix
+es un demonio que gestiona políticas de seguridad y control de servicios. 
+Utiliza el script principal 
+.I /usr/sbin/victrix_files/main.tcl
+y se apoya en la configuración definida en 
+.I /etc/victrix/victrix.conf.
+
+.SH COMANDOS
+.TP
+.B systemctl start victrix
+Inicia el servicio.
+.TP
+.B systemctl stop victrix
+Detiene el servicio.
+.TP
+.B systemctl status victrix
+Muestra el estado y logs recientes.
+
+.SH ARCHIVOS
+.TP
+.I /usr/sbin/victrix_files/main.tcl
+Script principal del servicio.
+.TP
+.I /etc/victrix/victrix.conf
+Archivo de configuración.
+.TP
+.I /lib/systemd/system/victrix.service
+Archivo de unidad de systemd.
+.TP
+.I /usr/share/man/man8/victrix.8
+Página de manual (esta página).
+
+.SH DIAGNÓSTICO
+Para monitorizar la actividad:
+.IP
+.B journalctl -u victrix.service -f
+
+.SH AUTOR
+Andrés Ruslan Abadías Otal.

@@ -34,7 +34,7 @@ jobs:
           chmod 0755 ./DEBIAN/preinst
           chmod 0755 ./DEBIAN/postinst
           chmod 0755 ./DEBIAN/prerm
-          chmod +x ./usr/sbin/ssp
+          chmod +x ./usr/sbin/victrix
 
       - name: List files before creating directory for .deb
         run: |
@@ -45,17 +45,17 @@ jobs:
         run: |
           mkdir -p package/DEBIAN
           mkdir -p package/usr/sbin
-          mkdir -p package/etc/ssp
+          mkdir -p package/etc/victrix
           mkdir -p package/lib/systemd/system
 
           cp -r DEBIAN/* package/DEBIAN/
           cp -r usr/sbin/* package/usr/sbin/
-          cp -r etc/ssp/* package/etc/ssp/
+          cp -r etc/victrix/* package/etc/victrix/
           cp -r lib/systemd/* package/lib/systemd/system/
 
       - name: Build .deb package
         run: |
-          dpkg-deb --build package ssp-package.deb
+          dpkg-deb --build package victrix-package.deb
 
       - name: Set up Git authentication
         run: |

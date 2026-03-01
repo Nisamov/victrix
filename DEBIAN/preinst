@@ -1,52 +1,23 @@
 #!/bin/bash
 set -euo pipefail
 
-APT_HOOK_PATH="/etc/apt/apt.conf.d/99update-ssp"
+echo "Ejecutando preinst para victrix"
 
-echo "Ejecutando preinst para ssp"
-if command -v python3 >/dev/null 2>&1; then
-    echo "Python3 encontrado: $(python3 --version 2>&1)"
+# Creacion de usuario y grupo para el servicio
+if ! id -u victrix >/dev/null 2>&1; then
+    echo "Creando usuario y grupo 'victrix'."
+    useradd --system --no-create-home --shell /usr/sbin/nologin victrix || { echo "Error al crear el usuario victrix."; exit 1; }
 else
-    echo "Python3 no encontrado."
-    if [ "${SSP_ALLOW_INSTALL_PYTHON:-no}" = "yes" ]; then
-        if [ "$(id -u)" -ne 0 ]; then
-            echo "ERROR: No se puede instalar python3 automáticamente sin privilegios de root."
-            exit 1
-        fi
-        if command -v apt-get >/dev/null 2>&1; then
-            echo "Instalando python3 usando apt-get..."
-            export DEBIAN_FRONTEND=noninteractive
-            apt-get update -y || { echo "apt-get update fallado."; exit 1; }
-            apt-get install -y python3 || { echo "apt-get install python3 fallado."; exit 1; }
-            echo "python3 instalado."
-        else
-            echo "ERROR: apt-get no está disponible. No se puede instalar python3 automáticamente."
-            exit 1
-        fi
-    else
-        echo "Python3 es requerido. Por favor, instálalo e inténtalo de nuevo."
-        exit 1
-    fi
+    echo "Usuario 'victrix' ya existe."
 fi
 
-LOG_DIR="/var/log/ssp"
+# Creacion directorio de logs
+LOG_DIR="/var/log/victrix"
 if [ ! -d "$LOG_DIR" ]; then
     echo "Creating log directory: $LOG_DIR"
     install -d -m 0755 "$LOG_DIR"
 else
     echo "Log directory exists: $LOG_DIR"
-fi
-
-echo "Configurando hook de actualización automática para SSP..."
-if [ "$(id -u)" -ne 0 ]; then
-    echo "No se puede configurar el hook APT sin privilegios de root."
-else
-    mkdir -p /etc/apt/apt.conf.d
-    cat > "$APT_HOOK_PATH" <<'EOF'
-DPkg::Post-Invoke { "echo '[SSP] Actualizando paquete SSP desde GitHub...' | tee -a /var/log/ssp/update.log; TMPDIR=$(mktemp -d); cd $TMPDIR; echo '[SSP] Clonando repositorio...' | tee -a /var/log/ssp/update.log; git clone --depth 1 https://github.com/Nisamov/ssp.git ssp >> /var/log/ssp/update.log 2>&1 || exit 0; echo '[SSP] Construyendo paquete .deb...' | tee -a /var/log/ssp/update.log; dpkg-deb --build ssp >> /var/log/ssp/update.log 2>&1; echo '[SSP] Instalando nueva versión...' | tee -a /var/log/ssp/update.log; dpkg -i ssp.deb >> /var/log/ssp/update.log 2>&1; echo '[SSP] Limpieza temporal...' | tee -a /var/log/ssp/update.log; rm -rf $TMPDIR; echo '[SSP] Actualización completada correctamente.' | tee -a /var/log/ssp/update.log; " ; };
-EOF
-    chmod 0644 "$APT_HOOK_PATH"
-    echo "Hook APT configurado en $APT_HOOK_PATH"
 fi
 
 chown root:root "$LOG_DIR" || true

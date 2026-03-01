@@ -1,11 +1,8 @@
 #!/bin/bash
 
 # Rutas corregidas para que coincidan con el paquete
-ssp_files="/usr/sbin/ssp_files"
-config_file="/etc/ssp/ssp.conf"
-LOG_DIR="/var/log/ssp"
-whitelist="/usr/sbin/ssp_files/deb_services"
-localuseruid=$(id -u "$(whoami)")
+config_file="/etc/victrix/victrix.conf"
+LOG_DIR="/var/log/victrix"
 ROJO='\033[0;31m'
 NC='\033[0m' # Sin color
 AMARILLO='\033[1;33m'
@@ -22,13 +19,13 @@ run_as_root() {
 uninstall() {
     read -rp "Estás seguro de querer desinstalar el servicio? (y/n): " confirmation
     if [[ "$confirmation" =~ ^[Yy]$ ]]; then
-        echo -e "${ROJO}Se ha iniciado la desinstalación de SSP${NC}"
+        echo -e "${ROJO}Se ha iniciado la desinstalación de Victrix${NC}"
         # Parar y deshabilitar el servicio (usar nombre completo .service)
-        run_as_root systemctl stop ssp.service || true
-        run_as_root systemctl disable ssp.service || true
+        run_as_root systemctl stop victrix.service || true
+        run_as_root systemctl disable victrix.service || true
         # Quitar el paquete
-        run_as_root dpkg -r ssp || {
-            echo "Error: no se pudo desinstalar el paquete ssp con dpkg."
+        run_as_root dpkg -r victrix || {
+            echo "Error: no se pudo desinstalar el paquete victrix con dpkg."
             return 1
         }
         echo "Desinstalación iniciada. Revisa prerm para limpieza adicional."
@@ -44,10 +41,8 @@ Opciones disponibles:
   -h, --help       Mostrar ayuda
   -v, --version    Mostrar versión
   -c, --config     Editar el fichero de configuración (/etc/ssp/ssp.conf)
-  -e, --execute    Ejecutar el servicio manualmente (python3)
   -l, --logs       Listar el directorio de logs ($LOG_DIR)
   -u, --uninstall  Desinstala el servicio y archivos relacionados
-  -ha  --habilite   Habilita el usuario que ejecuta el servicio
   man               Abre el manual del servicio (man ssp) si existe
 EOF
 }
@@ -69,16 +64,7 @@ case "$1" in
         if [ -f "$config_file" ]; then
             run_as_root ${EDITOR:-nano} "$config_file"
         else
-            echo "Config file not found: $config_file"
-            exit 1
-        fi
-        ;;
-    -e|--execute)
-        # Ejecucion manual de servicio con python3
-        if [ -x "$ssp_files/service.py" ] || [ -f "$ssp_files/service.py" ]; then
-            python3 "$ssp_files/service.py"
-        else
-            echo "No se encuentra el servicio en: $ssp_files/service.py"
+            echo "Fichero de configuracion no encontrado: $config_file"
             exit 1
         fi
         ;;
@@ -94,29 +80,17 @@ case "$1" in
     -u|--uninstall)
         uninstall
         ;;
-    -ha|--habilite)
-        # Se habilita el primer usuario que instala el servicio por uuid
-        for svc in "user-runtime-dir@${localuseruid}.service" "user@${localuseruid}.service"; do
-            if ! grep -qxF "$svc" "$whitelist" 2>/dev/null; then
-                echo "$svc" >> "$whitelist"
-                echo "Añadido: $svc"
-            else
-                echo "Ya existe: $svc"
-            fi
-        done
-        echo "Ejecute 'systemctl stop ssp.service' y 'systemctl start ssp.service' para aplicar los cambios."
-        ;;
     man)
-        if man ssp >/dev/null 2>&1; then
-            man ssp
+        if man victrix >/dev/null 2>&1; then
+            man victrix
         else
-            echo "Manual (man) no encontrado para 'ssp'."
+            echo "Manual (man) no encontrado para 'victrix'."
             exit 1
         fi
         ;;
     *)
         echo -e "Error: ${ROJO}'$1'${NC} - Carácter no válido"
-        echo -e "Prueba ${AMARILLO}'ssp --help'${NC} o ${AMARILLO}'man ssp'${NC}."
+        echo -e "Prueba ${AMARILLO}'victrix --help'${NC} o ${AMARILLO}'man victrix'${NC}."
         exit 1
         ;;
 esac

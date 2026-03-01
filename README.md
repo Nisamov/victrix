@@ -1,21 +1,20 @@
 ![Presetación Servicio](_repo/_media/SecureServiceProtocol.jpg)
 
 # Secure Service Protocol
-Este software permite controlar el estado de los servicios en tu equipo Debian.
-Puede ser peligroso si se configura de una mala manera.
+Servicio dedicado para ubuntu en proceso de configuracion
 
 ## Instalación
 
-Para descargar el software, ve a [releases](https://github.com/Nisamov/ssp/releases) y descárgate el paquete en el equipo, o ejecuta el siguiente comando desde la terminal:
+Para descargar el software, ve a [releases](https://github.com/Nisamov/victrix/releases) y descárgate el paquete en el equipo, o ejecuta el siguiente comando desde la terminal:
 ```sh
-sudo apt install git -y && git clone https://github.com/Nisamov/ssp
+sudo apt install git -y && git clone https://github.com/Nisamov/victrix
 ```
 
 ![Instalacion de Repositorio](_repo/_media/paso_sub1.png)
 
 Con el repositorio descargado, ejecuta el siguiente comando (ruta relativa):
 ```sh
-sudo chmod 0755 ssp/DEBIAN/*
+sudo chmod 0755 victrix/DEBIAN/*
 ```
 Los permisos deberian ser 0755 [0 usuario permisos rxw, 5 de grupos y 5 para otros]
 
@@ -34,83 +33,74 @@ sudo dpkg -i fichero.deb
 
 Finalmente iniciamos el servicio con:
 ```sh
-sudo systemctl start ssp.service
+sudo systemctl start victrix.service
 ```
 Y revisamos su estado con:
 ```
-sudo systemctl status ssp.service
+sudo systemctl status victrix.service
 ```
 
 ![Revisión de estado](_repo/_media/paso_sub3.png)
 
 Si se realiza algún cambio durante su ejecución, se recomienda reiniciar el servicio:
 ```sh
-sudo systemctl restart ssp.service
+sudo systemctl restart victrix.service
 ```
 
 ## Rutas
 Las rutas usadas del software son:
-- `/usr/local/sbin/ssp_files` Contiene los ficheros generales del servicio.
-- `/etc/ssp.conf` Contiene la configuración del servicio.
-- `/lib/systemd/system/ssp.service` Servicio Secure Service Protocol
+- `/usr/local/sbin/victrix_files` Contiene los ficheros generales del servicio.
+- `/etc/victrix.conf` Contiene la configuración del servicio.
+- `/lib/systemd/system/victrix.service` Servicio Secure Service Protocol
 
 ## Configuración
 Para que el servicio pueda leer y aplicar la configuración establecida, es necesario reiniciar el servicio, pues este, lee durante su arranque, la configuración.
 No obstante, lee activamente los ficheros de los servicios permitidos en el sistema.
 
-**Fichero /etc/ssp.conf**
+**Fichero /etc/victrix.conf**
 ```sh
-## Seconds to wait before analyzing the services again
-check_interval=15
-## If enabled, the SSP will stop and unable the services
-purge_on_detect=false
-## If dir not found, create it
-create_not_existing_dir=false
+N/A
 ```
 
 ## Configurción Seguridad del Servicio
 ```sh
-ProtectSystem=full
-ProtectHome=yes
-NoNewPrivileges=yes
-PrivateTmp=yes
-ProtectKernelModules=yes
-ProtectKernelTunables=yes
-ProtectControlGroups=yes
-RestrictRealtime=yes
-CapabilityBoundingSet=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
-AmbientCapabilities=CAP_SYS_ADMIN CAP_NET_ADMIN CAP_SYS_RESOURCE CAP_KILL
+N/A
 ```
 
 ## Estructura
 ```
-ssp
+victrix
+├── _repo
+│   └── _media
+│       ├── paso_sub1.png
+│       ├── paso_sub2.gif
+│       ├── paso_sub3.png
+│       └── SecureServiceProtocol.jpg
+├── .github
+│   ├── workflows
+│   │   └── build_deb.yml
+│   └── FUNDING.yml
 ├── DEBIAN
 │   ├── control
 │   ├── postinst
 │   ├── preinst
 │   └── prerm
-├── LICENSE
-├── README.md
-├── _repo
-│   └── _media
-│       └── SecureServiceProtocol.jpg
 ├── etc
 │   └── ssp
 │       └── ssp.conf
 ├── lib
 │   └── systemd
 │       └── system
-│           └── ssp.service
-└── usr
-    ├── sbin
-    │   ├── ssp
-    │   └── ssp_files
-    │       ├── deb_services
-    │       ├── funcionamiento.md
-    │       └── service.py
-    └── share
-        └── man
-            └── man8
-                └── ssp.8
+│           └── victrix.service
+├── usr
+│   ├── sbin
+│   │   ├── victrix_files
+│   │   │   └── main.tcl
+│   │   └── victrix
+│   └── share
+│       └── man
+│           └── man8
+│               └── victrix.8
+├── LICENSE
+└── README.md
 ```

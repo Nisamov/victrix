@@ -8,33 +8,33 @@ AMARILLO='\033[1;33m'
 if command -v systemctl >/dev/null 2>&1; then
     echo "Recargando systemd y habilitando servicio..."
     systemctl daemon-reload || true
-    systemctl unmask ssp.service || true
-    if systemctl enable --now ssp.service; then
-        echo "ssp.service habilitado y arrancado."
+    systemctl unmask victrix.service || true
+    if systemctl enable --now victrix.service; then
+        echo "victrix.service habilitado y arrancado."
     else
-        echo -e "${AMARILLO}ADVERTENCIA${NC}: No se pudo habilitar o arrancar ssp.service. Comprueba los logs de systemd."
+        echo -e "${AMARILLO}ADVERTENCIA${NC}: No se pudo habilitar o arrancar victrix.service. Comprueba los logs de systemd."
     fi
 else
     echo -e "${AMARILLO}ADVERTENCIA${NC}: systemctl no disponible: omitiendo habilitación/arranque del servicio."
 fi
 
 # Aplicar permisos de forma condicional (no fallar si los archivos no existen)
-if [ -f "/lib/systemd/system/ssp.service" ]; then
-    chmod 0644 /lib/systemd/system/ssp.service
+if [ -f "/lib/systemd/system/victrix.service" ]; then
+    chmod 0644 /lib/systemd/system/victrix.service
 else
-    echo "Aviso: /lib/systemd/system/ssp.service no encontrado."
+    echo "Aviso: /lib/systemd/system/victrix.service no encontrado."
 fi
 
-if [ -f "/usr/sbin/ssp" ]; then
-    chmod 0755 /usr/sbin/ssp
+if [ -f "/usr/sbin/victrix" ]; then
+    chmod 0755 /usr/sbin/victrix
 else
-    echo -e "${AMARILLO}ADVERTENCIA${NC}: /usr/sbin/ssp no encontrado."
+    echo -e "${AMARILLO}ADVERTENCIA${NC}: Fichero /usr/sbin/victrix no encontrado."
 fi
 
-if [ -f "/usr/sbin/ssp_files/service.py" ]; then
-    chmod 0755 /usr/sbin/ssp_files/service.py
+if [ -d "/usr/sbin/victrix" ]; then
+    chmod 0755 /usr/sbin/victrix
 else
-    echo -e "${AMARILLO}ADVERTENCIA${NC}: /usr/sbin/ssp_files/service.py no encontrado."
+    echo -e "${AMARILLO}ADVERTENCIA${NC}: Directorio /usr/sbin/victrix no encontrado."
 fi
 
 echo "Postinst terminado"
