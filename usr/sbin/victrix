@@ -40,10 +40,10 @@ show_help() {
 Opciones disponibles:
   -h, --help       Mostrar ayuda
   -v, --version    Mostrar versión
-  -c, --config     Editar el fichero de configuración (/etc/ssp/ssp.conf)
+  -c, --config     Editar el fichero de configuración (/etc/victrix/victrix.conf)
   -l, --logs       Listar el directorio de logs ($LOG_DIR)
   -u, --uninstall  Desinstala el servicio y archivos relacionados
-  man               Abre el manual del servicio (man ssp) si existe
+  man              Abre el manual del servicio (man victrix) si existe
 EOF
 }
 

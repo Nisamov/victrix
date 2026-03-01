@@ -31,10 +31,10 @@ else
     echo -e "${AMARILLO}ADVERTENCIA${NC}: Fichero /usr/sbin/victrix no encontrado."
 fi
 
-if [ -d "/usr/sbin/victrix" ]; then
-    chmod 0755 /usr/sbin/victrix
+if [ -d "/usr/sbin/victrix_files" ]; then
+    chmod 0755 /usr/sbin/victrix_files
 else
-    echo -e "${AMARILLO}ADVERTENCIA${NC}: Directorio /usr/sbin/victrix no encontrado."
+    echo -e "${AMARILLO}ADVERTENCIA${NC}: Directorio /usr/sbin/victrix_files no encontrado."
 fi
 
 echo "Postinst terminado"
