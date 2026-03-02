@@ -33,6 +33,11 @@ fi
 
 if [ -d "/usr/sbin/victrix_files" ]; then
     chmod 0755 /usr/sbin/victrix_files
+    if [ -f "/usr/sbin/victrix_files/main.tcl" ]; then
+        chmod +x /usr/sbin/victrix_files/main.tcl
+    else
+        echo -e "${AMARILLO}ADVERTENCIA${NC}: Fichero /usr/sbin/victrix_files/main.tcl no encontrado."
+    fi
 else
     echo -e "${AMARILLO}ADVERTENCIA${NC}: Directorio /usr/sbin/victrix_files no encontrado."
 fi

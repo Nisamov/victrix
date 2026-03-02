@@ -1,4 +1,4 @@
-![Presetación Servicio](_repo/_media/SecureServiceProtocol.jpg)
+![Presetación Servicio](_repo/_media/victrix.png)
 
 # Secure Service Protocol
 Servicio dedicado para ubuntu en proceso de configuracion
@@ -29,18 +29,14 @@ Tras descargarlo, ubicate en la ruta del fichero y ejecuta el siguiente comando:
 sudo dpkg -i fichero.deb
 ```
 
-![Instalacion completada](_repo/_media/paso_sub2.gif)
-
 Finalmente iniciamos el servicio con:
 ```sh
 sudo systemctl start victrix.service
 ```
 Y revisamos su estado con:
-```
+```sh
 sudo systemctl status victrix.service
 ```
-
-![Revisión de estado](_repo/_media/paso_sub3.png)
 
 Si se realiza algún cambio durante su ejecución, se recomienda reiniciar el servicio:
 ```sh
@@ -58,13 +54,9 @@ Para que el servicio pueda leer y aplicar la configuración establecida, es nece
 No obstante, lee activamente los ficheros de los servicios permitidos en el sistema.
 
 **Fichero /etc/victrix.conf**
-```sh
-N/A
-```
-
-## Configurción Seguridad del Servicio
-```sh
-N/A
+```conf
+# Tiempo de espera entre revisiones (en segundos)
+set intervalo 10
 ```
 
 ## Estructura
@@ -73,8 +65,6 @@ victrix
 ├── _repo
 │   └── _media
 │       ├── paso_sub1.png
-│       ├── paso_sub2.gif
-│       ├── paso_sub3.png
 │       └── SecureServiceProtocol.jpg
 ├── .github
 │   ├── workflows
@@ -86,8 +76,8 @@ victrix
 │   ├── preinst
 │   └── prerm
 ├── etc
-│   └── ssp
-│       └── ssp.conf
+│   └── victrix
+│       └── victrix.conf
 ├── lib
 │   └── systemd
 │       └── system
@@ -95,6 +85,11 @@ victrix
 ├── usr
 │   ├── sbin
 │   │   ├── victrix_files
+│   │   │   ├── functions
+│   │   │   │   ├── f1.tcl
+│   │   │   │   ├── f2.tcl
+│   │   │   │   ├── f3.tcl
+│   │   │   │   └── f4.tcl
 │   │   │   └── main.tcl
 │   │   └── victrix
 │   └── share
