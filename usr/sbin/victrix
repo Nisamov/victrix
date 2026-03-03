@@ -71,6 +71,8 @@ Opciones disponibles:
         Ejemplo: 'victrix -g -source LinuxCommands'
     -nown author/repo_name  > Descargar desde repositorio externo
         Ejemplo: 'victrix -g -nown user/radrepo'
+  -pop, --popcat  >     Reproducir popcat en ascii
+    (victrix -pop || victrix -popcat)
   man             >     Abre el manual
     (victrix man || man victrix)
 EOF
@@ -148,6 +150,17 @@ case "$1" in
             echo "Error: opción de git no válida. Usa '-source repo_name' o '-nown author/repo_name'."
             exit 1
         fi
+        ;;
+    -pop|--popcat)
+        while true;
+        do
+            clear
+            # Estado 1
+            cat "/usr/sbin/victrix_files/motion/popcat/nf.txt"
+            clear
+            # Estado 2
+            cat "/usr/sbin/victrix_files/motion/popcat/ns.txt"
+        done  
         ;;
     man)
         if man victrix >/dev/null 2>&1; then
