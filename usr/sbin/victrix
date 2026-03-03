@@ -38,12 +38,41 @@ uninstall() {
 show_help() {
     cat <<EOF
 Opciones disponibles:
-  -h, --help       Mostrar ayuda
-  -v, --version    Mostrar versión
-  -c, --config     Editar el fichero de configuración (/etc/victrix/victrix.conf)
-  -l, --logs       Listar el directorio de logs ($LOG_DIR)
-  -u, --uninstall  Desinstala el servicio y archivos relacionados
-  man              Abre el manual del servicio (man victrix) si existe
+  -h, --help            Mostrar esta ayuda
+  -hx,--help-extend     Mostrar ayuda extendida
+  -v, --version         Mostrar versión
+  -c, --config          Editar el fichero de configuración (/etc/victrix/victrix.conf)
+  -l, --logs            Listar el directorio de logs ($LOG_DIR)
+  -u, --uninstall       Desinstala el servicio y archivos relacionados
+  -g, --git             Descargar repositorio de github
+    -source $3          Descargar desde el repositorio del autor
+    -nown $3            Descargar desde repositorio externo
+  man                   Abre el manual del servicio (man victrix) si existe
+EOF
+}
+
+show_help_extend() {
+    cat <<EOF
+Opciones disponibles:
+  -h, --help      >     Mostrar esta ayuda
+    (victrix -h || victrix --help)
+  -hx,--help-extend     Mostrar ayuda extendida
+    (victrix -hx || victrix --help-extend)
+  -v, --version   >     Mostrar versión
+    (victrix -v || victrix --version)
+  -c, --config    >     Editar el fichero de configuración (/etc/victrix/victrix.conf)
+    (victrix -c || victrix --config)
+  -l, --logs      >     Listar el directorio de logs ($LOG_DIR)
+    (victrix -l || victrix --logs)
+  -u, --uninstall >     Desinstala el servicio y archivos relacionados
+    (victrix -u || victrix --uninstall)
+  -g, --git       >     Descargar repositorio de github
+    -source repo_name       > Descargar desde el repositorio del autor
+        Ejemplo: 'victrix -g -source LinuxCommands'
+    -nown author/repo_name  > Descargar desde repositorio externo
+        Ejemplo: 'victrix -g -nown user/radrepo'
+  man             >     Abre el manual
+    (victrix man || man victrix)
 EOF
 }
 
@@ -56,6 +85,9 @@ fi
 case "$1" in
     -h|--help)
         show_help
+        ;;
+    -hx|--help-extend)
+        show_help_extend
         ;;
     -v|--version)
         echo "V0.0.0"
@@ -80,11 +112,40 @@ case "$1" in
     -u|--uninstall)
         uninstall
         ;;
+    -g|--git)
+        repodir="/home/$USER/Documents/repos"
+        if [ ! -d "/home/$USER/Documents" ]; then
+            echo "Creando directorio de documentos para el usuario: /home/$USER/Documents..."
+            mkdir -p "/home/$USER/Documents"
+        else
+            if [ ! -d "$repodir" ]; then
+                echo "Creando directorio de repositorios: '$repodir'..."
+                mkdir -p "$repodir"
+                if [ -d "$repodir" ]; then
+                    echo "Directorio de repositorios creado correctamente."
+                    if [ "$2" == "-source" ] && [ -n "$3" ]; then
+                        echo "Descargando desde el repositorio del autor: $3"
+                    git clone "https://github.com/Nisamov/$3.git" $repodir
+                    elif [ "$2" == "-nown" ] && [ -n "$3" ]; then
+                        echo "Descargando desde repositorio externo: $3"
+                        git clone "https://github.com/$3.git" $repodir
+                    else
+                        echo "Error: opción de git no válida. Usa '-source repo_name' o '-nown author/repo_name'."
+                        exit 1
+                    fi
+                else
+                    echo "Error: no se ha podido crear el directorio de repositorios."
+                    exit 1
+                fi
+            fi
+        fi
+        ;;
     man)
         if man victrix >/dev/null 2>&1; then
             man victrix
         else
-            echo "Manual (man) no encontrado para 'victrix'."
+            echo "Manual no encontrado."
+            echo "Fuente: /share/man/man8/victrix.8"
             exit 1
         fi
         ;;
