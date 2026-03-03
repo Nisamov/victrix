@@ -113,7 +113,7 @@ case "$1" in
         uninstall
         ;;
     -g|--git)
-        repodir="/home/$USER/Documents/repos"
+        repodir="/home/$USER/Documents/repos/"
         if [ ! -d "/home/$USER/Documents" ]; then
             echo "Creando directorio de documentos para el usuario: /home/$USER/Documents..."
             mkdir -p "/home/$USER/Documents"
@@ -123,21 +123,21 @@ case "$1" in
                 mkdir -p "$repodir"
                 if [ -d "$repodir" ]; then
                     echo "Directorio de repositorios creado correctamente."
-                    if [ "$2" == "-source" ] && [ -n "$3" ]; then
-                        echo "Descargando desde el repositorio del autor: $3"
-                    git clone "https://github.com/Nisamov/$3.git" $repodir
-                    elif [ "$2" == "-nown" ] && [ -n "$3" ]; then
-                        echo "Descargando desde repositorio externo: $3"
-                        git clone "https://github.com/$3.git" $repodir
-                    else
-                        echo "Error: opción de git no válida. Usa '-source repo_name' o '-nown author/repo_name'."
-                        exit 1
-                    fi
                 else
                     echo "Error: no se ha podido crear el directorio de repositorios."
                     exit 1
                 fi
             fi
+        fi
+        if [ "$2" == "-source" ] && [ -n "$3" ]; then
+            echo "Descargando desde el repositorio del autor: $3"
+            git clone "https://github.com/Nisamov/$3" "$repodir/$3"
+        elif [ "$2" == "-nown" ] && [ -n "$3" ]; then
+            echo "Descargando desde repositorio externo: $3"
+            git clone "https://github.com/$3" "$repodir/$3"
+        else
+            echo "Error: opción de git no válida. Usa '-source repo_name' o '-nown author/repo_name'."
+            exit 1
         fi
         ;;
     man)
