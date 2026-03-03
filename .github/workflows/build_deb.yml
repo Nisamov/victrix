@@ -51,7 +51,7 @@ jobs:
           cp -r DEBIAN/* package/DEBIAN/
           cp -r usr/sbin/* package/usr/sbin/
           cp -r etc/victrix/* package/etc/victrix/
-          cp -r lib/systemd/* package/lib/systemd/system/
+          cp -r lib/systemd/system/* package/lib/systemd/system/
 
       - name: Build .deb package
         run: |
@@ -91,5 +91,5 @@ jobs:
           curl -X POST \
             -H "Authorization: token ${{ secrets.SSP_TOKEN }}" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary @ssp-package.deb \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release.outputs.release_id }}/assets?name=ssp-package.deb"
+            --data-binary @victrix-package.deb \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release.outputs.release_id }}/assets?name=victrix-package.deb"
