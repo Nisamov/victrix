@@ -16,9 +16,47 @@ run_as_root() {
     fi
 }
 
+download() {
+    local TEMP_DIR="/var/tmp/victrix_update"
+    read -rp "¿Desea actualizar el programa desde GitHub? (s/n): " actualizacion
+    if [[ "$actualizacion" =~ ^[Ss]$ ]]; then
+        # Limpieza y creación del directorio temporal
+        if [[ ! -d "$TEMP_DIR" ]]; then
+            run_as_root mkdir -p "$TEMP_DIR"
+        else
+            run_as_root rm -rf "$TEMP_DIR"
+        fi
+        echo -e "${AMARILLO}Descargando última versión...${NC}"
+        if git clone --depth 1 "https://github.com/Nisamov/victrix" "$TEMP_DIR"; then
+            echo -e "${AMARILLO}Sincronizando archivos del sistema...${NC}"
+            # -a (archivo: mantiene permisos y dueños)
+            # -v (verbose)
+            # -u (update: no sobreescribe archivos más nuevos en el destino)
+            # --exclude: se excluyen archivos de control de debian y del repo
+            run_as_root rsync -avu --exclude={'.git/','.github/','DEBIAN/','README.md','LICENSE','_repo/'} \
+                "$TEMP_DIR/" /
+            echo -e "${AMARILLO}Recargando servicios...${NC}"
+            run_as_root systemctl daemon-reload
+            # reiniciar el servicio si estaba activo
+            if systemctl is-active --quiet victrix.service; then
+                run_as_root systemctl restart victrix.service
+                echo "Servicio victrix reiniciado."
+            fi
+            echo -e "\033[0;32m¡Actualización completada con éxito!${NC}"
+            # Eliminación de directorio temporal
+            run_as_root rm -rf "$TEMP_DIR"
+        else
+            echo -e "${ROJO}Error: No ha podido clonar el repositorio.${NC}"
+            return 1
+        fi
+    else
+        echo -e "${ROJO}Actualización cancelada.${NC}"
+    fi
+}
+
 uninstall() {
-    read -rp "Estás seguro de querer desinstalar el servicio? (y/n): " confirmation
-    if [[ "$confirmation" =~ ^[Yy]$ ]]; then
+    read -rp "Estás seguro de querer desinstalar el servicio? (s/n): " confirmation
+    if [[ "$confirmation" =~ ^[Ss]$ ]]; then
         echo -e "${ROJO}Se ha iniciado la desinstalación de Victrix${NC}"
         # Parar y deshabilitar el servicio (usar nombre completo .service)
         run_as_root systemctl stop victrix.service || true
@@ -43,6 +81,7 @@ Opciones disponibles:
   -v, --version         Mostrar versión
   -c, --config          Editar el fichero de configuración (/etc/victrix/victrix.conf)
   -l, --logs            Listar el directorio de logs ($LOG_DIR)
+  -d, --download        Actualizar los ficheros del programa
   -u, --uninstall       Desinstala el servicio y archivos relacionados
   -g, --git             Descargar repositorio de github
     -source $3          Descargar desde el repositorio del autor
@@ -64,6 +103,8 @@ Opciones disponibles:
     (victrix -c || victrix --config)
   -l, --logs      >     Listar el directorio de logs ($LOG_DIR)
     (victrix -l || victrix --logs)
+  -d. --download  >     Actualizar los ficheros (descargar cambios de github)
+    (victrix -d || victrix --download)
   -u, --uninstall >     Desinstala el servicio y archivos relacionados
     (victrix -u || victrix --uninstall)
   -g, --git       >     Descargar repositorio de github
@@ -92,7 +133,7 @@ case "$1" in
         show_help_extend
         ;;
     -v|--version)
-        echo "V0.0.0"
+        cat "/usr/sbin/victrix_files/version.v"
         ;;
     -c|--config)
         if [ -f "$config_file" ]; then
@@ -110,6 +151,9 @@ case "$1" in
             echo "Intenta crear el directorio con sudo mkdir -p $LOG_DIR o revisa la configuración."
             exit 1
         fi
+        ;;
+    -d|--download
+        download
         ;;
     -u|--uninstall)
         uninstall
@@ -152,15 +196,15 @@ case "$1" in
         fi
         ;;
     -pop|--popcat)
-        while true;
-        do
-            clear
-            # Estado 1
+        while true; do
+            # Posicionar el cursor en la fila 0, columna 0
+            printf "\033[H" # El uso de este comando permite evitar que la pantalla parpadee por uso de "clear"
             cat "/usr/sbin/victrix_files/motion/popcat/nf.txt"
-            clear
-            # Estado 2
+            sleep 0.2
+            printf "\033[H" # Pisa la imagen anterior para reescribirlo con la siguiente en un bucle infinito hasta que sea detenido
             cat "/usr/sbin/victrix_files/motion/popcat/ns.txt"
-        done  
+            sleep 0.2
+        done
         ;;
     man)
         if man victrix >/dev/null 2>&1; then
