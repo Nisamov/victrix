@@ -18,18 +18,25 @@ run_as_root() {
 
 download() {
     local TEMP_DIR="/var/tmp/victrix_update"
+    
+    # Preguntar al usuario si desea proceder
     read -rp "¿Desea actualizar el programa desde GitHub? (s/n): " actualizacion
     if [[ "$actualizacion" =~ ^[Ss]$ ]]; then
         if [[ -d "$TEMP_DIR" ]]; then
             run_as_root rm -rf "$TEMP_DIR"
-        else
-            mkdir -p "$TEMP_DIR"
         fi
+        mkdir -p "$TEMP_DIR"
         echo -e "${AMARILLO}Descargando última versión...${NC}"
         if git clone --depth 1 "https://github.com/Nisamov/victrix" "$TEMP_DIR"; then
             echo -e "${AMARILLO}Sincronizando archivos del sistema...${NC}"
             run_as_root rsync -avu --exclude={'.git/','.github/','DEBIAN/','README.md','LICENSE','_repo/'} \
                 "$TEMP_DIR/" /
+            echo -e "${AMARILLO}Ajustando permisos de ejecución y lectura...${NC}"
+            run_as_root chmod +x /usr/sbin/victrix
+            run_as_root chmod -R +r /usr/sbin/victrix_files/
+            if [ -f "/usr/share/man/man8/victrix.8" ]; then
+                run_as_root chmod 644 /usr/share/man/man8/victrix.8
+            fi
             echo -e "${AMARILLO}Recargando servicios...${NC}"
             run_as_root systemctl daemon-reload
             if systemctl is-active --quiet victrix.service; then
