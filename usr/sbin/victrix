@@ -20,30 +20,23 @@ download() {
     local TEMP_DIR="/var/tmp/victrix_update"
     read -rp "¿Desea actualizar el programa desde GitHub? (s/n): " actualizacion
     if [[ "$actualizacion" =~ ^[Ss]$ ]]; then
-        # Limpieza y creación del directorio temporal
-        if [[ ! -d "$TEMP_DIR" ]]; then
-            run_as_root mkdir -p "$TEMP_DIR"
-        else
+        if [[ -d "$TEMP_DIR" ]]; then
             run_as_root rm -rf "$TEMP_DIR"
+        else
+            mkdir -p "$TEMP_DIR"
         fi
         echo -e "${AMARILLO}Descargando última versión...${NC}"
         if git clone --depth 1 "https://github.com/Nisamov/victrix" "$TEMP_DIR"; then
             echo -e "${AMARILLO}Sincronizando archivos del sistema...${NC}"
-            # -a (archivo: mantiene permisos y dueños)
-            # -v (verbose)
-            # -u (update: no sobreescribe archivos más nuevos en el destino)
-            # --exclude: se excluyen archivos de control de debian y del repo
             run_as_root rsync -avu --exclude={'.git/','.github/','DEBIAN/','README.md','LICENSE','_repo/'} \
                 "$TEMP_DIR/" /
             echo -e "${AMARILLO}Recargando servicios...${NC}"
             run_as_root systemctl daemon-reload
-            # reiniciar el servicio si estaba activo
             if systemctl is-active --quiet victrix.service; then
                 run_as_root systemctl restart victrix.service
                 echo "Servicio victrix reiniciado."
             fi
             echo -e "\033[0;32m¡Actualización completada con éxito!${NC}"
-            # Eliminación de directorio temporal
             run_as_root rm -rf "$TEMP_DIR"
         else
             echo -e "${ROJO}Error: No ha podido clonar el repositorio.${NC}"
@@ -152,7 +145,7 @@ case "$1" in
             exit 1
         fi
         ;;
-    -d|--download
+    -d|--download)
         download
         ;;
     -u|--uninstall)
