@@ -1,48 +1,86 @@
-.TH VICTRIX ? "Null" "1.0" "Manual de Victrix"
+.TH VICTRIX 8 "2024" "Andres Ruslan" "Manual de Victrix"
+
 .SH NOMBRE
-victrix \- Servicio de control y seguridad basado en Tcl.
+victrix \- Servicio de control, seguridad basado en Tcl y herramienta de gestión.
 
 .SH SINOPSIS
+.B victrix
+[\fIOPCIONES\fR]
+.br
 .B systemctl
 [\fICOMANDO\fR] victrix.service
 
 .SH DESCRIPCIÓN
 .B victrix
-es un demonio que gestiona políticas de seguridad y control de servicios. 
-Utiliza el script principal 
-.I /usr/sbin/victrix_files/main.tcl
-y se apoya en la configuración definida en 
-.I /etc/victrix/victrix.conf.
+es un demonio que gestiona políticas de seguridad y control de servicios. Utiliza el script principal \fI/usr/sbin/victrix_files/main.tcl\fR y se apoya en la configuración definida en \fI/etc/victrix/victrix.conf\fR. Además, el binario \fIvictrix\fR actúa como interfaz de mantenimiento para actualizar, configurar y desinstalar el servicio.
 
-.SH COMANDOS
+.SH OPCIONES
+.TP
+.B \-h, \-\-help
+Muestra la ayuda básica.
+.TP
+.B \-hx, \-\-help\-extend
+Muestra la ayuda extendida con ejemplos de uso de cada comando.
+.TP
+.B \-v, \-\-version
+Muestra la versión actual instalada leyendo \fI/usr/sbin/victrix_files/version.v\fR.
+.TP
+.B \-c, \-\-config
+Abre el archivo de configuración en el editor predeterminado (requiere privilegios de root).
+.TP
+.B \-l, \-\-logs
+Lista el contenido del directorio de registros en \fI/var/log/victrix\fR.
+.TP
+.B \-d, \-\-download
+Inicia el proceso de actualización. Descarga la última versión desde GitHub y sincroniza los archivos del sistema mediante \fBrsync\fR.
+.TP
+.B \-u, \-\-uninstall
+Detiene el servicio, lo deshabilita de systemd y elimina el paquete del sistema usando \fBdpkg\fR.
+.TP
+.B \-g, \-\-git [\-source | \-nown] \fIREPO\fR
+Herramienta de clonación de repositorios.
+.RS
+.IP "\fB\-source\fR" 4
+Clona desde el perfil del autor (Nisamov).
+.IP "\fB\-nown\fR" 4
+Clona desde un autor/repositorio externo especificado.
+.RE
+.TP
+.B \-pop, \-\-popcat
+Ejecuta una animación ASCII de Popcat en el terminal. Usa \fBCtrl+C\fR para salir.
+
+.SH COMANDOS DE SERVICIO (SYSTEMD)
 .TP
 .B systemctl start victrix
-Inicia el servicio.
+Inicia el demonio de seguridad.
 .TP
 .B systemctl stop victrix
-Detiene el servicio.
+Detiene el demonio.
 .TP
 .B systemctl status victrix
-Muestra el estado y logs recientes.
+Muestra el estado operativo y las últimas líneas de log.
 
 .SH ARCHIVOS
 .TP
-.I /usr/sbin/victrix_files/main.tcl
-Script principal del servicio.
+.I /usr/sbin/victrix
+Script de gestión (binario principal).
+.TP
+.I /usr/sbin/victrix_files/
+Directorio de recursos, scripts Tcl y archivos de versión.
 .TP
 .I /etc/victrix/victrix.conf
-Archivo de configuración.
+Archivo de configuración global.
 .TP
 .I /lib/systemd/system/victrix.service
-Archivo de unidad de systemd.
+Unidad de servicio de systemd.
 .TP
 .I /usr/share/man/man8/victrix.8
-Página de manual (esta página).
+Página de manual del sistema.
 
 .SH DIAGNÓSTICO
-Para monitorizar la actividad:
+Para monitorizar la actividad en tiempo real del demonio:
 .IP
-.B journalctl -u victrix.service -f
+\fBjournalctl \-u victrix.service \-f\fR
 
 .SH AUTOR
 Andrés Ruslan Abadías Otal.

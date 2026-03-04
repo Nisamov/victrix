@@ -126,7 +126,7 @@ case "$1" in
         show_help_extend
         ;;
     -v|--version)
-        cat "/usr/sbin/victrix_files/version.v"
+        echo "0.0.1"
         ;;
     -c|--config)
         if [ -f "$config_file" ]; then

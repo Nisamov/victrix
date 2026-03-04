@@ -4,76 +4,36 @@ on:
   push:
     branches:
       - '**'
-
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout repo
         uses: actions/checkout@v3
-
-      - name: Show user and current directory
-        run: |
-          echo "Current user: $(whoami)"
-          echo "Current directory: $(pwd)"
-
       - name: Set up dependencies
         run: |
           sudo apt update
-          sudo apt install -y dpkg-dev jq
-
-      - name: Show file structure for debugging
-        run: |
-          echo "Listing current directory:"
-          ls -R
-
-      - name: Set permissions
-        run: |
-          ls -l ./usr/sbin/
-          chmod 0755 ./DEBIAN/preinst
-          chmod 0755 ./DEBIAN/postinst
-          chmod 0755 ./DEBIAN/prerm
-          chmod +x ./usr/sbin/victrix
-
-      - name: List files before creating directory for .deb
-        run: |
-          echo "Listing files in the current directory before creating .deb directory:"
-          ls -al
-
+          sudo apt install -y dpkg-dev jq curl
       - name: Create directory structure for .deb
         run: |
-          mkdir -p package/DEBIAN
-          mkdir -p package/usr/sbin
-          mkdir -p package/etc/victrix
-          mkdir -p package/lib/systemd/system
-
-          cp -r DEBIAN/* package/DEBIAN/
-          cp -r usr/sbin/* package/usr/sbin/
-          cp -r etc/victrix/* package/etc/victrix/
-          cp -r lib/systemd/system/* package/lib/systemd/system/
+          mkdir -p package
+          cp -r etc lib usr DEBIAN package/
+          chmod 0755 package/DEBIAN/preinst package/DEBIAN/postinst package/DEBIAN/prerm
+          chmod +x package/usr/sbin/victrix
+          find package/usr/share/man -type f -exec chmod 0644 {} +
 
       - name: Build .deb package
         run: |
-          dpkg-deb --build package victrix-package.deb
-
-      - name: Set up Git authentication
-        run: |
-          git config --global user.email "actions@github.com"
-          git config --global user.name "GitHub Actions"
-          git remote set-url origin https://x-access-token:${{ secrets.SSP_TOKEN }}@github.com/${{ github.repository }}.git
+          dpkg-deb --build package victrix.deb
 
       - name: Get or create release
         id: get_release
         run: |
-          # Buscar release existente con tag 'latest'
           existing=$(curl -s -H "Authorization: token ${{ secrets.SSP_TOKEN }}" \
             https://api.github.com/repos/${{ github.repository }}/releases/tags/latest)
 
           release_id=$(echo "$existing" | jq -r '.id')
-
           if [ "$release_id" = "null" ]; then
-            echo "No existe release 'latest'. Creando..."
             created=$(curl -s -X POST \
               -H "Authorization: token ${{ secrets.SSP_TOKEN }}" \
               -H "Content-Type: application/json" \
@@ -81,9 +41,12 @@ jobs:
               https://api.github.com/repos/${{ github.repository }}/releases)
             release_id=$(echo "$created" | jq -r '.id')
           else
-            echo "Release existente encontrada. ID: $release_id"
+            asset_id=$(echo "$existing" | jq -r '.assets[] | select(.name=="victrix.deb") | .id')
+            if [ "$asset_id" != "" ] && [ "$asset_id" != "null" ]; then
+              curl -s -X DELETE -H "Authorization: token ${{ secrets.SSP_TOKEN }}" \
+                https://api.github.com/repos/${{ github.repository }}/releases/assets/$asset_id
+            fi
           fi
-
           echo "release_id=$release_id" >> $GITHUB_OUTPUT
 
       - name: Upload .deb asset
@@ -91,5 +54,5 @@ jobs:
           curl -X POST \
             -H "Authorization: token ${{ secrets.SSP_TOKEN }}" \
             -H "Content-Type: application/octet-stream" \
-            --data-binary @victrix-package.deb \
-            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release.outputs.release_id }}/assets?name=victrix-package.deb"
+            --data-binary @victrix.deb \
+            "https://uploads.github.com/repos/${{ github.repository }}/releases/${{ steps.get_release.outputs.release_id }}/assets?name=victrix.deb"
